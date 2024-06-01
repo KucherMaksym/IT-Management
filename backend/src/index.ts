@@ -11,6 +11,7 @@ import {isAuthenticated} from "./middlewares/middlewares.middleware"
 import asyncHandler from "express-async-handler";
 import {CompanyModel} from "./models/company.model";
 import userRouter from "./routers/user.router";
+import taskRouter from "./routers/task.router";
 
 
 const app = express();
@@ -33,6 +34,7 @@ app.use(session({
 
 app.use("/api/companies", companyRouter);
 app.use("/api/users", userRouter);
+app.use("/api/tasks", taskRouter);
 
 passport.use(new GitHubStrategy({
         clientID: `${process.env.GITHUB_CLIENT_ID}`,

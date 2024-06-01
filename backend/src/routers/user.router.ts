@@ -12,21 +12,34 @@ router.use(passport.session());
 const managerAndAdminRoles = [Roles.ADMIN, Roles.MANAGER];
 
 router.patch("/changeRole", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
-    const { userToChangeRole, roleChanger, newRole, isNewCompany } = req.body;
+    const { userToChangeRole, newRole, isNewCompany } = req.body;
 
     if (isNewCompany) {
-        const roleChanged = UserModel.findOneAndUpdate(userToChangeRole, { role: 'admin' });
+        const roleChanged = await UserModel.findOneAndUpdate(userToChangeRole, { role: 'admin' });
         res.send(roleChanged);
-    } else if (managerAndAdminRoles.includes(roleChanger)) {
-        if (roleChanger === Roles.MANAGER && newRole === Roles.ADMIN) {
-            res.status(403).send({ error: "Менеджер не может назначить роль администратора" });
+    }
+
+    if (managerAndAdminRoles.includes(req.user.role)) {
+        if (req.user.role === Roles.MANAGER && newRole === Roles.ADMIN) {
+            res.status(404).send({ error: "Forbidden" });
         } else {
-            const roleChanged = UserModel.findOneAndUpdate(userToChangeRole, { role: newRole });
+            const roleChanged = await UserModel.findByIdAndUpdate(userToChangeRole, { role: newRole });
+            console.log(roleChanged)
             res.send(roleChanged);
         }
     } else {
-        res.status(403).send({ error: "Запрещено изменять роль" });
+        res.status(404).send({ error: "Forbidden" });
     }
+
 }));
+
+router.get("/:id", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res, next) => {
+    if (!req.params.id) {
+        res.status(400).send({ error: "id not provided" });
+        return;
+    }
+    const userDb = await UserModel.findById(req.params.id);
+    res.send(userDb);
+}))
 
 export default router;

@@ -4,18 +4,18 @@ export interface Task {
     name: string,
     description: string,
     deadline: Date,
-    completed: boolean,
-    userIdToComplete: string
-    accepted: boolean,
+    completed?: boolean,
+    userIdToComplete?: string
+    accepted?: boolean,
     bonus?: number,
-    taken: boolean
+    taken?: boolean
     takenBy?: string;
 }
 
 export const taskSchema = new Schema<Task>({
     name: {type: String, required: true},
     description: {type: String, required: true},
-    deadline: {type: Date, required: true},
+    deadline: {type: Date},
     completed: {type: Boolean, default: false},
     userIdToComplete: {type: String },
     accepted: {type: Boolean, default: false},

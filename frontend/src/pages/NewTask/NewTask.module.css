@@ -1,0 +1,19 @@
+.textarea {
+
+}
+
+.label {
+    font-size: 16px;
+    left: -4px;
+    top: -4px;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.textarea:focus ~ label, .focused {
+    top: -30px;
+    left: -7px;
+    transition: all 0.3s;
+    font-size: 12px;
+}

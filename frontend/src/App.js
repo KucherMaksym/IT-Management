@@ -10,11 +10,14 @@ import EmployeesPage from "./pages/EmployeesPage/EmployeesPage";
 import AdminRoute from "./components/Routes/AdminRoute";
 import UserRouter from "./components/Routes/UserRouter";
 import NotFound from "./pages/NotFound/NotFound";
+import NewTask from "./pages/NewTask/NewTask";
+import TaskList from "./pages/Tasks/TaskList/TaskList";
+import TaskPage from "./pages/Tasks/TaskPage/TaskPage";
 
 
 function App() {
     return (
-        <div className="App">
+        <div className="App flex flex-col items-center">
             <UserProvider>
                 <Header />
                 <Routes>
@@ -24,7 +27,8 @@ function App() {
                     <Route path="/profile" element={<UserRouter />}>
                         <Route path="" element={<ProfilePage />} />
                         <Route path="messages" element={<p>messages</p>} />
-                        <Route path="tasks" element={<p>Tasks</p>} />
+                        <Route path="tasks" element={<TaskList />} />
+                        <Route path="tasks/:taskId" element={<TaskPage />} />
                         <Route path="stars" element={<p>Stars</p>} />
                     </Route>
 
@@ -32,6 +36,7 @@ function App() {
 
                     <Route path="/company" element={<AdminRoute />}>
                         <Route path="employees" element={<EmployeesPage />} />
+                        <Route path={"newTask/:id"} element={<NewTask />} />
                     </Route>
 
                     <Route path="/*" element={<NotFound />} />

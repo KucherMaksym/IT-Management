@@ -39,9 +39,8 @@ export const UserProvider = ({ children }) => {
         try {
             const response = await axios.get("http://localhost:8000/api/companies/companyByAdmin", { withCredentials: true });
             if (response.data) {
-                console.log(response.data);
                 setCompany({company: response.data, isAdmin: true});
-                console.log(company);
+                //console.log(company);
             } else {
                 const isEmployee = await axios.get("http://localhost:8000/api/companies/findUserCompany", { withCredentials: true }).then((response) => {
                     setCompany({company: response.data, isAdmin: false})
