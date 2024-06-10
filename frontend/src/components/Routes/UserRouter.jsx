@@ -1,9 +1,13 @@
 import React from 'react';
-import {useUser} from "../../UserProvider";
-import {Navigate, Outlet} from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const UserRouter = () => {
-    const {user, loading} = useUser();
+    const { user, loading, isAuthenticated } = useSelector((state) => state.user);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     if (!user && !loading) {
         return <Navigate to="/login" />;

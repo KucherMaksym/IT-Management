@@ -10,6 +10,7 @@ export interface Task {
     bonus?: number,
     taken?: boolean
     takenBy?: string;
+    files?: string[];
 }
 
 export const taskSchema = new Schema<Task>({
@@ -22,6 +23,7 @@ export const taskSchema = new Schema<Task>({
     bonus: {type: Number, default: 0},
     taken: {type: Boolean, default: false},
     takenBy: {type: String},
+    files: {type: [String]},
 },
 {
     toJSON: {

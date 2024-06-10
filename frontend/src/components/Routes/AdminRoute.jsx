@@ -1,12 +1,17 @@
 import React from 'react';
-import {useUser} from "../../UserProvider";
-import {Navigate, Outlet} from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const AdminRoute = () => {
-    const {loading, company } = useUser();
+    const { company } = useSelector(state => state.user);
+    const { loading, isAdmin } = company;
 
-    if (!company.isAdmin && !loading) {
+    if (!loading && !isAdmin) {
         return <Navigate to="/login" />;
+    }
+
+    if (loading) {
+        return <div>Loading...</div>;
     }
 
     return <Outlet />;

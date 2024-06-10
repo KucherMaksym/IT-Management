@@ -1,10 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import {useUser} from "../../../UserProvider";
 import EmployeeCard from "../EmployeeCard/EmployeeCard";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import {lightGreen} from "@mui/material/colors";
 
 const MyComponent = () => {
 
@@ -53,13 +51,8 @@ const MyComponent = () => {
             isNewCompany: false
         }, {withCredentials: true}).then((response) => {
             console.log(response.data);
-            window.location.reload()
         })
     }
-
-    // useEffect(() => {
-    //     getAllEmployees();
-    // }, []);
 
     useEffect(() => {
         getAllEmployees();

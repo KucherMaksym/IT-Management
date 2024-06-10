@@ -6,18 +6,15 @@ import dayjs from 'dayjs';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { styled, CssBaseline } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import {useState} from "react";
-import {PickersActionBar} from "@mui/x-date-pickers";
-
-const highlightedDates = [dayjs().add(3, 'day'), dayjs().add(5, 'day'), dayjs().add(7, 'day')];
-
+import { forwardRef } from "react";
+import { PickersActionBar } from "@mui/x-date-pickers";
 
 const theme = createTheme({
     components: {
         MuiPickersDay: {
             styleOverrides: {
                 root: ({ ownerState }) => ({
-                    ...(highlightedDates.some(date => ownerState.day.isSame(date, 'day')) && {
+                    ...(ownerState.isHighlighted && {
                         backgroundColor: '#ff4081',
                         color: 'white',
                         '&:hover, &:focus': {
@@ -30,15 +27,28 @@ const theme = createTheme({
     },
 });
 
-const actionBar = React.forwardRef((props, ref) => {
-    return(
-        <PickersActionBar sx={{display: "none"}}  onCancel={props.onCancel} onAccept={props.onAccept} onClear={props.onClear} onSetToday={props.onSetToday}>
+const actionBar = forwardRef((props, ref) => (
+    <PickersActionBar
+        sx={{ display: "none" }}
+        onCancel={props.onCancel}
+        onAccept={props.onAccept}
+        onClear={props.onClear}
+        onSetToday={props.onSetToday}
+    />
+));
 
-        </PickersActionBar>
-    )
-})
+const CustomDay = forwardRef(({ day, outsideCurrentMonth, highlightedDates, ...props }, ref) => {
+    if (!highlightedDates) {
+        return(
+        <PickersDay
+            {...props}
+            outsideCurrentMonth={outsideCurrentMonth}
+            day={day}
+            ref={ref}
+        />
+        );
+    }
 
-const CustomDay = React.forwardRef(({ day, outsideCurrentMonth, ...props }, ref) => {
     const isHighlighted = highlightedDates.some(date => day.isSame(date, 'day'));
 
     return (
@@ -48,10 +58,10 @@ const CustomDay = React.forwardRef(({ day, outsideCurrentMonth, ...props }, ref)
             day={day}
             ref={ref}
             sx={{
-                backgroundColor: isHighlighted ? '#ff4081' : 'transparent',
-                color: isHighlighted ? 'white' : 'inherit',
+                //backgroundColor: isHighlighted ? '#ff4081' : 'transparent',
+                //color: isHighlighted ? 'white' : 'inherit',
                 '&:after': {
-                    content: isHighlighted ? `" "` : null,
+                    content: isHighlighted ? '" "' : null,
                     right: "0",
                     top: "0",
                     borderRadius: "50%",
@@ -60,23 +70,16 @@ const CustomDay = React.forwardRef(({ day, outsideCurrentMonth, ...props }, ref)
                     width: "10px",
                     backgroundColor: "red",
                     zIndex: "2",
-
-                    // content: '"*"',
-                    // color: 'green',
-                    // marginLeft: '4px',
                 },
-                '&:hover, &:focus': {
-                    backgroundColor: isHighlighted ? '#c60055' : 'rgba(0,0,0,0.08)',
-                },
+                //'&:hover, &:focus': {
+                //    backgroundColor: isHighlighted ? '#c60055' : 'rgba(0,0,0,0.08)',
+                //},
             }}
-        >
-        </PickersDay>
+        />
     );
 });
 
-export default function StaticDatePickerWithHighlight(props) {
-    const today = dayjs();
-
+export default function StaticDatePickerWithHighlight({ highlightedDates, selectedDay, onChange }) {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
@@ -84,11 +87,11 @@ export default function StaticDatePickerWithHighlight(props) {
                 <StaticDatePicker
                     orientation="portrait"
                     disablePast={true}
-                    value={props.selectedDay}
-                    onChange={props.onChange}
+                    value={selectedDay}
+                    onChange={onChange}
                     slots={{
-                        day: CustomDay,
-                        actionBar: actionBar
+                        day: (props) => <CustomDay {...props} highlightedDates={highlightedDates} />,
+                        actionBar: actionBar,
                     }}
                 />
             </LocalizationProvider>

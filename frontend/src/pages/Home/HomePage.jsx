@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import Modal from "../../components/Modal/Modal";
-import {useUser} from "../../UserProvider";
 import axios from "axios";
+import {useSelector} from "react-redux";
 
 
 
 const MyComponent = () => {
 
-    const { user, loading, isAuthenticated, company} = useUser();
+    const { user, loading, isAuthenticated, company} = useSelector(state => state.user);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [companyName, setCompanyName] = useState("")
 

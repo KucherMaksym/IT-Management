@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import {Link} from "react-router-dom";
-import {useUser} from "../../UserProvider";
+import {useSelector} from "react-redux";
 
 const MyComponent = () => {
 
-    const { user, loading, isAuthenticated, company} = useUser()
+    const { user, loading, isAuthenticated, company} = useSelector(state => state.user);
 
     const [tab, setTab] = useState('profile');
 

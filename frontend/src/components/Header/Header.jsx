@@ -1,27 +1,14 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import logo from "./../assets/DoIT.png"
 import {Link, useLocation} from "react-router-dom";
 import ProfileNavbar from "../ProfileNavbar/ProfileNavbar";
-import {useUser} from "../../UserProvider";
+import {useSelector} from "react-redux";
 
 const MyComponent = () => {
-
-    //const [userLogo, setUserLogo] = React.useState();
-
-    const { user, loading, isAuthenticated} = useUser();
+    const {user, loading, isAuthenticated} = useSelector((state) => state.user);
 
     const location = useLocation();
     let isProfile = location.pathname.startsWith("/profile");
-
-    // useEffect(() => {
-    //     return () => {
-    //         axios.get("http://localhost:8000/profile", {withCredentials: true}).then((res) => {
-    //             setUserLogo(res.data.avatar)
-    //         });
-    //     };
-    // }, []);
-
-
     return (
         <header className={` w-full flex flex-col items-center justify-center `}>
             <div className="container flex items-center justify-between h-16">
