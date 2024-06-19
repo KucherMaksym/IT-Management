@@ -7,7 +7,7 @@ const initialState = {
     company: {
         company: null,
         isAdmin: false,
-        loading: true, // Добавлено состояние загрузки для компании
+        loading: true,
     },
     error: null,
 };
@@ -40,7 +40,7 @@ const userReducer = (state = initialState, action) => {
                 ...state,
                 company: {
                     ...state.company,
-                    loading: true, // Установка состояния загрузки для компании
+                    loading: true,
                 },
             };
         case FETCH_COMPANY_SUCCESS:
@@ -48,7 +48,7 @@ const userReducer = (state = initialState, action) => {
                 ...state,
                 company: {
                     ...action.payload,
-                    loading: false, // Завершение загрузки компании
+                    loading: false,
                 },
             };
         default:

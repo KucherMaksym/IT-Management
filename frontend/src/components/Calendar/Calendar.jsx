@@ -58,8 +58,6 @@ const CustomDay = forwardRef(({ day, outsideCurrentMonth, highlightedDates, ...p
             day={day}
             ref={ref}
             sx={{
-                //backgroundColor: isHighlighted ? '#ff4081' : 'transparent',
-                //color: isHighlighted ? 'white' : 'inherit',
                 '&:after': {
                     content: isHighlighted ? '" "' : null,
                     right: "0",
@@ -69,7 +67,8 @@ const CustomDay = forwardRef(({ day, outsideCurrentMonth, highlightedDates, ...p
                     height: "10px",
                     width: "10px",
                     backgroundColor: "red",
-                    zIndex: "2",
+                    zIndex: "1",
+                    transition: "all 0,2s",
                 },
                 //'&:hover, &:focus': {
                 //    backgroundColor: isHighlighted ? '#c60055' : 'rgba(0,0,0,0.08)',

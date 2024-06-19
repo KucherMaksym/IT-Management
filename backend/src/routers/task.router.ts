@@ -1,11 +1,12 @@
-import express, { Router } from 'express';
+import express, {Router} from 'express';
 import passport from "passport";
-import { isAuthenticated } from "../middlewares/middlewares.middleware";
+import {isAuthenticated, isTeamLead} from "../middlewares/middlewares.middleware";
 import asyncHandler from "express-async-handler";
-import { UserModel } from "../models/user.model";
-import { Task, TaskModel } from "../models/task.model";
+import {Roles, UserModel} from "../models/user.model";
+import {Task, TaskModel, TaskStatus} from "../models/task.model";
 import multer from "multer";
 import path from "node:path";
+import {disconnect, startSession} from "mongoose";
 
 const admin = require("firebase-admin");
 const serviceAccount = require("./../firebase-key.json");
@@ -31,13 +32,23 @@ router.get("/allTasks", (req, res, next) => isAuthenticated(req, res, next), asy
     res.send(allTasks);
 }));
 
+router.get("/allConsiderationTasks", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+
+    const tasks = await TaskModel.find({status: TaskStatus.CONSIDERATION})
+    res.send(tasks);
+
+}))
+
 router.get("/:id", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
     const id = req.params.id;
     const user = await UserModel.findById(req.user._id);
+    console.log(user);
 
-    if (!user?.activeTasks?.includes(id)) {
-        res.status(404).send({response: "Task not found"});
-        return;
+    if (!user?.activeTasks?.includes(id) && !user?.considerationTasks?.includes(id)) {
+        if (req.user.role !== Roles.ADMIN && req.user.role !== Roles.MANAGER ) {
+            res.status(404).send({response: "Task not found"});
+            return;
+        }
     }
 
     const DbTask = await TaskModel.findById(id);
@@ -80,6 +91,8 @@ router.post("/newTask/:id", upload.array("files"), (req, res, next) => isAuthent
         description,
         deadline,
         takenBy: id,
+        createdBy: req.user._id,
+        status: TaskStatus.IN_PROGRESS
     };
 
     if (req.files) {
@@ -115,7 +128,7 @@ router.post("/newTask/:id", upload.array("files"), (req, res, next) => isAuthent
     res.status(200).send(updatedUser);
 }));
 
-router.get("/download/:fileName", (req, res) => {
+router.get("/download/:fileName", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
     const fileName = req.params.fileName;
     const file = bucket.file(`uploads/${fileName}`);
 
@@ -127,6 +140,67 @@ router.get("/download/:fileName", (req, res) => {
     }).catch((error: any) => {
         res.status(500).send({ error: 'Failed to get signed URL', details: error });
     });
-});
+}));
+
+router.patch("/complete/:id", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+    const id = req.params.id;
+
+        try {
+            const updatedTask = await TaskModel.findByIdAndUpdate(id, { status: TaskStatus.CONSIDERATION }, { new: true });
+
+            const user = await UserModel.findById(updatedTask?.takenBy);
+
+            user?.considerationTasks?.push(id);
+            const updatedActiveTasks = user?.activeTasks?.filter(function (newActiveTasks) {
+                return newActiveTasks !== id;
+            })
+            user ? user.activeTasks = updatedActiveTasks : null;
+            await user?.save();
+            res.send(user);
+
+        } catch (err) {
+            console.error("Error", err);
+            res.status(500).send(err);
+        }
+    })
+);
+
+router.patch("/accept/:id", isTeamLead, (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+    const taskId = req.params.id;
+    const user = await UserModel.findOne({considerationTasks: taskId});
+
+    const session = await startSession();
+
+    session.startTransaction();
+
+    // $pull deletes the value from array
+
+    try {
+        const updatedUser = await UserModel.findByIdAndUpdate(user?._id, {
+            $pull : {considerationTasks: taskId},
+            $push: {completedTasks: taskId}
+        }, {session, new: true});
+        const updatedTask = await TaskModel.findByIdAndUpdate(taskId, {
+            status: TaskStatus.COMPLETED,
+        }, {session, new: true});
+
+        if (updatedTask && updatedUser) {
+            await session.commitTransaction();
+            console.log("successful commit")
+            res.send(updatedTask);
+        } else {
+            await session.abortTransaction();
+            console.log('Transaction aborted');
+        }
+
+    } catch (error) {
+        console.error('Transaction error:', error);
+        await session.abortTransaction();
+    } finally {
+        await session.endSession();
+    }
+
+}))
+
 
 export default router;

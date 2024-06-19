@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import TaskCard from "../../../components/TaskCard/TaskCard";
+import TaskCard from "../TaskCard/TaskCard";
 import StaticDatePickerWithHighlight from "../../../components/Calendar/Calendar";
 import Task from "../TaskPage/Task";
 import dayjs from "dayjs";
+import {useSelector} from "react-redux";
+import noTasks from "./../../../components/assets/noTasks.png"
 
 const TaskList = () => {
-    const [tasks, setTasks] = useState([]);
+    const {tasks, loading} = useSelector((state) => state.tasks);
     const [dates, setDates] = useState([]);
     const [currentTask, setCurrentTask] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
-    const [selected, setFiles] = useState(null);
+    const [isImageOpened, setIsImageOpened] = useState(false);
+    const [currentAvatar, setCurrentAvatar] = useState(null);
 
     const handleNewDay = (e) => {
         setSelectedDay(e)
@@ -30,66 +33,71 @@ const TaskList = () => {
                 });
         }
     }
-
-    const getUserTasks = () => {
-        axios.get("http://localhost:8000/api/tasks/allTasks", { withCredentials: true }).then((response) => {
-            const taskDates = response.data.map((task) => task.deadline);
-            setDates(taskDates);
-            setTasks(response.data);
-        });
-    };
-
     useEffect(() => {
-        getUserTasks();
-    }, []);
+        if (localStorage.getItem("selectedTask") && localStorage.getItem("selectedTask") !== "undefined") {
+            const savedTask = localStorage.getItem("selectedTask")
+            const findCurrentTask = tasks.find((task) => task.id === savedTask);
+            if (findCurrentTask) {
+                setCurrentTask(findCurrentTask);
+                setSelectedDay(dayjs(findCurrentTask.deadline));
+            }
+        }
+        const taskDates = tasks.map((task) => task.deadline);
+        setDates(taskDates);
+
+    }, [tasks]);
+
 
     const clickTask = (id) => () => {
-        axios.get(`http://localhost:8000/api/tasks/${id}`, { withCredentials: true }).then((response) => {
-            setCurrentTask(response.data)
-            setSelectedDay(dayjs(response.data.deadline))
-        })
+        const newSelectedTask = tasks.find((task) => task.id === id);
+        setCurrentTask(newSelectedTask)
+        setSelectedDay(dayjs(newSelectedTask.deadline))
+        localStorage.setItem("selectedTask", id);
     }
 
-    const handleDownload = async (fileName) => {
-        try {
-            const response = await axios.get(`http://localhost:8000/api/tasks/download/${fileName}`);
-            window.open(response.data.url, '_blank');
-        } catch (error) {
-            console.error('Error getting the download URL:', error);
-        }
-    };
-
     return (
-        <div className={`flex flex-col items-center justify-center p-3`}>
-            <div className="flex flex-col-reverse container items-center lg:flex-row mt-10">
-                <div className=" lg:w-5/12 flex items-center flex-col">
+        <div className={`flex container h-[calc(100vh_-_106px)] flex-col items-center justify-center-700 p-3`}>
+            {tasks.length > 0  && !loading ?
+                <div className="flex flex-col-reverse w-full max-w-4xl items-center lg:flex-row mt-10">
+                    <div className=" lg:w-5/12 flex items-center bg-gray-200 h-full justify-start flex-col">
+                        {isImageOpened ? document.body.classList.add("no-scroll") : document.body.classList.remove("no-scroll")}
+                        {tasks.map((task, index) => (
+                            <TaskCard
+                                setAvatar={setCurrentAvatar}
+                                isSelected={currentTask ? currentTask._id === task._id : false}
+                                index={index}
+                                key={task._id}
+                                maxIndex={tasks.length - 1}
+                                {...task}
+                                onClick={clickTask(task._id)}
+                            />
+                        ))}
+                    </div>
+                    <div className="w-7/12 flex flex-col lg:items-end justify-center">
+                        <StaticDatePickerWithHighlight onChange={handleNewDay} selectedDay={selectedDay}
+                                                       highlightedDates={dates}/>
+                    </div>
+                </div>
+                :
+                <div className={`h-full flex flex-col items-center justify-center`}>
+                    <h2 className={`text-zinc-800 text-3xl font-bold`}>
+                        No any tasks for you
+                    </h2>
+                    <img src={noTasks} alt=""/>
 
-                    {tasks.map((task, index) => (
-                        <TaskCard
-                            isSelected={currentTask ? currentTask._id === task._id : false}
-                            index={index}
-                            key={task._id}
-                            maxIndex={tasks.length - 1}
-                            {...task}
-                            onClick={clickTask(task._id)}
-                        />
-                    ))}
                 </div>
-                <div className="w-7/12 flex flex-col items-center justify-center">
-                    <StaticDatePickerWithHighlight onChange={handleNewDay} selectedDay={selectedDay}
-                                                   highlightedDates={dates}/>
-                </div>
+            }
+            { currentTask && (
+            <div className={`w-full flex my-10 items-center justify-center`}>
+                <Task
+                    key={currentTask._id}
+                    avatar={currentAvatar}
+                    isImageOpened={setIsImageOpened}
+                    task={currentTask}
+                    {...currentTask}
+                />
             </div>
-            <div className={`w-full flex items-center justify-center`}>
-                {
-                    currentTask && (
-                        <Task
-                            handleDownload={handleDownload}
-                            task={currentTask}
-                            {...currentTask} />
-                    )
-                }
-            </div>
+            )}
         </div>
     );
 };

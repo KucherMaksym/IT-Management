@@ -1,4 +1,5 @@
 import {model, Schema} from "mongoose";
+import {Task} from "./task.model";
 
 export enum Roles {
     ADMIN = 'admin',
@@ -18,11 +19,12 @@ export interface User {
     about?: string;
     avatar?: string;
     email?: string;
-    number?: string
+    //number?: string
     role?: Roles;
-    tasks?: string[];
     company?: string;
+    completedTasks?: string[];
     activeTasks?: string[];
+    considerationTasks?: Task[];
     groups?: string[];
     bonuses?: number;
 }
@@ -37,9 +39,11 @@ export const UserSchema = new Schema<User>({
     company: {type: String},
     groups: {type: [String]},
     role: {type: String, required: true, default: Roles.OTHER},
-    tasks: {type: [String]},
+    completedTasks: {type: [String]},
     activeTasks: {type: [String]},
+    considerationTasks: {type: [String]},
     bonuses:{type: Number, default: 0},
+
 })
 
 

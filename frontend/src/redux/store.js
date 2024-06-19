@@ -1,16 +1,12 @@
-import {applyMiddleware, combineReducers, compose, createStore} from "redux";
 import userReducer from "./reducers/userReducer";
-import {thunk} from "redux-thunk";
-import {composeWithDevTools} from "redux-devtools-extension";
+import { configureStore } from '@reduxjs/toolkit'
+import tasksReducer from "./reducers/tasksReducer";
 
-const rootReducer = combineReducers({
-    user: userReducer,
-});
-
-const composeEnhancers = composeWithDevTools
-    ? composeWithDevTools(applyMiddleware(thunk))
-    : compose(applyMiddleware(thunk));
-
-const store = createStore(rootReducer, composeEnhancers);
+const store = configureStore({
+    reducer: {
+        user: userReducer,
+        tasks: tasksReducer
+    }
+})
 
 export default store;

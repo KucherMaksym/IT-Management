@@ -5,16 +5,16 @@ import HomePage from "./pages/Home/HomePage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import Header from "./components/Header/Header";
 import NewCompany from "./components/Modal/Modal";
-//import { UserProvider } from "./UserProvider";
 import EmployeesPage from "./pages/EmployeesPage/EmployeesPage";
 import AdminRoute from "./components/Routes/AdminRoute";
 import UserRouter from "./components/Routes/UserRouter";
 import NotFound from "./pages/NotFound/NotFound";
-import NewTask from "./pages/NewTask/NewTask";
+import NewTask from "./pages/Tasks/NewTask/NewTask";
 import TaskList from "./pages/Tasks/TaskList/TaskList";
 import {getProfile} from "./redux/actions/userActions";
 import {useEffect} from "react";
 import {useDispatch} from "react-redux";
+import ConsiderationPage from "./pages/ConsiderationPage/Consideration";
 
 
 function App() {
@@ -29,7 +29,6 @@ function App() {
 
     return (
         <div className="App flex flex-col items-center">
-            {/*<UserProvider>*/}
                 <Header />
                 <Routes>
                     <Route path="/" element={<HomePage />} />
@@ -48,11 +47,11 @@ function App() {
                     <Route path="/company" element={<AdminRoute />}>
                         <Route path="employees" element={<EmployeesPage />} />
                         <Route path={"newTask/:id"} element={<NewTask />} />
+                        <Route path="consideration" element={<ConsiderationPage />} />
                     </Route>
 
                     <Route path="/*" element={<NotFound />} />
                 </Routes>
-            {/*</UserProvider>*/}
         </div>
     );
 }

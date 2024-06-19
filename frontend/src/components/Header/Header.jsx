@@ -9,6 +9,7 @@ const MyComponent = () => {
 
     const location = useLocation();
     let isProfile = location.pathname.startsWith("/profile");
+    let isCompany = location.pathname.startsWith("/company");
     return (
         <header className={` w-full flex flex-col items-center justify-center `}>
             <div className="container flex items-center justify-between h-16">
@@ -24,7 +25,7 @@ const MyComponent = () => {
                     }
             </div>
             <div className={` flex w-full justify-center  border-b-2 border-b-gray-300`}>
-                {isProfile && (<ProfileNavbar/>)}
+                {isProfile && (<ProfileNavbar/>) || isCompany && (<ProfileNavbar/>)}
             </div>
 
         </header>

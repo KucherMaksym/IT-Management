@@ -1,4 +1,5 @@
 import axios from "axios";
+import {getTasks} from "./tasksActions";
 
 export const FETCH_USER_REQUEST = 'FETCH_USER_REQUEST';
 export const FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS';
@@ -40,6 +41,7 @@ export const getProfile = () => {
             }
             dispatch(fetchUserSuccess(user));
             dispatch(findUserCompany());
+            dispatch(getTasks())
         } catch (error) {
             dispatch(fetchUserFailure(error.message));
         }

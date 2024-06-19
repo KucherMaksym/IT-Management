@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import axios from "axios";
 import EmployeeList from "../../components/EmployeeComponents/EmployeeList/EmployeeList";
-import StaticDatePickerLandscape from "../../components/Calendar/Calendar";
 
 const MyComponent = () => {
 

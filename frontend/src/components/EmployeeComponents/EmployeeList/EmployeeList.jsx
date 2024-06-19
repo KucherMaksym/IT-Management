@@ -78,7 +78,7 @@ const MyComponent = () => {
     return (
         <div className="flex container w-screen flex-wrap p-4 ">
             {
-                employee && employee.map((employee) => (
+                employee.length > 0 && employee.map((employee) => (
                     <EmployeeCard key={employee._id} setParams={openModal(employee._id)} {...employee}></EmployeeCard>
                 ))
             }

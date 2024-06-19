@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import StaticDatePickerLandscape from "../../components/Calendar/Calendar";
-import Input from "../../components/Input/Input";
+import StaticDatePickerLandscape from "../../../components/Calendar/Calendar";
+import Input from "../../../components/Input/Input";
 import classes from "./NewTask.module.css";
 import axios from "axios";
 import { useParams } from "react-router-dom";
