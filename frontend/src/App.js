@@ -15,6 +15,8 @@ import {getProfile} from "./redux/actions/userActions";
 import {useEffect} from "react";
 import {useDispatch} from "react-redux";
 import ConsiderationPage from "./pages/ConsiderationPage/Consideration";
+import Chat from "./pages/Chat/Chat";
+import CompanyRouter from "./components/Routes/CompanyRouter";
 
 
 function App() {
@@ -36,10 +38,12 @@ function App() {
 
                     <Route path="/profile" element={<UserRouter />}>
                         <Route path="" element={<ProfilePage />} />
-                        <Route path="messages" element={<p>messages</p>} />
-                        <Route path="tasks" element={<TaskList />} />
-                        {/*<Route path="tasks/:taskId" element={<Task />} />*/}
                         <Route path="stars" element={<p>Stars</p>} />
+                    </Route>
+
+                    <Route path={"/profile"} element={<CompanyRouter/>}>
+                        <Route path="messages" element={<Chat/>} />
+                        <Route path="tasks" element={<TaskList />} />
                     </Route>
 
                     <Route path="/newCompany" element={<NewCompany />} />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import TaskCard from "../TaskCard/TaskCard";
 import StaticDatePickerWithHighlight from "../../../components/Calendar/Calendar";
-import Task from "../TaskPage/Task";
+import Task from "../Task/Task";
 import dayjs from "dayjs";
 import {useSelector} from "react-redux";
 import noTasks from "./../../../components/assets/noTasks.png"

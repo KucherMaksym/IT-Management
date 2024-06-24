@@ -12,18 +12,24 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 router.get("/allEmployees", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
-    await CompanyModel.findOne({admin: req.user._id}).then((response) => {
-        const employee = UserModel.find({ '_id': { $in: response?.employees } })
-            .then(users => {
-                console.log(users)
-                res.send(users);
-            })
-            .catch(err => {
-                return res.send(err);
-            });
-    });
-}))
+    try {
+        let company = await CompanyModel.findOne({admin: req.user._id});
 
+        if (!company) {
+            company = await CompanyModel.findOne({employees: req.user._id});
+        }
+        if (!company) {
+            res.status(404).send("Company is not found");
+            return;
+        }
+        const employees = await UserModel.find({ '_id': { $in: company.employees } });
+
+        res.send(employees);
+    } catch (err) {
+        console.error("Error ", err);
+        res.status(500).send("Internal server error");
+    }
+}));
 router.get("/findUserCompany", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
     const company = await CompanyModel.findOne({employees: req.user._id});
     res.send(company);

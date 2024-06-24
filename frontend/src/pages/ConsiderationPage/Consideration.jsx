@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import TaskCard from "../Tasks/TaskCard/TaskCard";
-import Task from "../Tasks/TaskPage/Task";
+import Task from "../Tasks/Task/Task";
 
 const ConsiderationPage = () => {
     const [tasks, setTasks] = useState([]);

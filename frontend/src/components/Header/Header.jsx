@@ -1,10 +1,10 @@
-import React, {useEffect} from 'react';
+import React, {memo } from 'react';
 import logo from "./../assets/DoIT.png"
 import {Link, useLocation} from "react-router-dom";
 import ProfileNavbar from "../ProfileNavbar/ProfileNavbar";
 import {useSelector} from "react-redux";
 
-const MyComponent = () => {
+const Header = memo(() => {
     const {user, loading, isAuthenticated} = useSelector((state) => state.user);
 
     const location = useLocation();
@@ -30,6 +30,6 @@ const MyComponent = () => {
 
         </header>
     );
-};
+});
 
-export default MyComponent;
+export default Header;

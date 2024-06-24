@@ -10,10 +10,24 @@ import dotenv from 'dotenv'
 import {isAuthenticated} from "./middlewares/middlewares.middleware"
 import userRouter from "./routers/user.router";
 import taskRouter from "./routers/task.router";
+import {Server} from "socket.io";
+import { createServer } from "http";
+import {socketHandler} from "./socket";
+import chatRouter from "./routers/chat.router";
 
 
 const app = express();
 app.use(express.json());
+
+const httpServer = createServer(app);
+
+export const io = new Server(httpServer, {
+    cors: {
+        origin: ['http://192.168.0.168:3000', 'http://localhost:3000'],
+        credentials: true
+    }
+});
+socketHandler(io)
 
 dbConnection();
 dotenv.config();
@@ -33,6 +47,7 @@ app.use(session({
 app.use("/api/companies", companyRouter);
 app.use("/api/users", userRouter);
 app.use("/api/tasks", taskRouter);
+app.use("/api/chat", chatRouter);
 
 passport.use(new GitHubStrategy({
         clientID: `${process.env.GITHUB_CLIENT_ID}`,
@@ -111,7 +126,6 @@ app.get('/error', (req: express.Request, res: express.Response) => {
     res.send('Error. Try again');
 });
 
-
-app.listen(8000, () => {
+httpServer.listen(8000, () => {
     console.log('http://localhost:8000');
 });

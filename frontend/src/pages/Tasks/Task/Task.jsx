@@ -3,11 +3,15 @@ import dayjs from "dayjs";
 import FileExtension from "../../../components/FileExtension/FileExtension";
 import axios from "axios";
 import ImageFullScreen from "../../ImageFullScreen/ImageFullScreen";
+import TaskImages from "./TaskImages/TaskImages";
+import TaskFiles from "./TaskFiles/TaskFiles";
 
 const Task = (props) => {
     const [isImageOpened, setIsImageOpened] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
     const [isTaskDivScrollable, setIsTaskDivScrollable] = useState(false);
+    const [images, setImages] = useState([]);
+    const [files, setFiles] = useState([]);
     const taskComponent = useRef();
 
     const completeTask = () => {
@@ -42,6 +46,28 @@ const Task = (props) => {
 
     }, [])
 
+    useEffect(() => {
+        const newFiles = [];
+        const newImages = [];
+
+        props.task.files.forEach((fileUrl) => {
+            const fileName = fileUrl.split('/').pop().split('?')[0];
+
+            if (["jpg", "png", "jpeg"].includes(fileName.split(".").pop())) {
+                newImages.push(fileUrl);
+            } else {
+                newFiles.push(fileUrl);
+            }
+        });
+
+        setFiles(newFiles);
+        setImages(newImages);
+
+        console.log("files");
+        console.log(newFiles);
+        console.log("images");
+        console.log(newImages);
+    }, [props.task.files]);
     return (
         <div className={`w-full lg:max-w-4xl h-full max-h-[700px] ${isTaskDivScrollable ? "overflow-y-scroll" : ""} bg-gray-200 rounded-xl `}  ref={taskComponent}>
             {isImageOpened && <ImageFullScreen onClose={closeImgInFullScreen} fileUrl={currentImage} />}
@@ -81,36 +107,27 @@ const Task = (props) => {
                         )}
                     </p>
                 </div>
-
-                {props.task.files && props.task.files.length > 0 && (
+                { images.length > 0 &&
                     <div className={`my-10 flex flex-wrap`}>
-                        {props.task.files.map((fileUrl, index) => {
-                            const fileName = fileUrl.split('/').pop().split('?')[0];
-                            return (
-                                <div className={`w-1/3 p-2 max-w-xs`} key={index}>
-                                    {props.loading ? (
-                                        <div className="w-full h-40 bg-gray-300 animate-pulse"></div>
-                                    ) : fileName.split(".").pop() === "jpg" ? (
-                                        <div
-                                            className={`h-40 overflow-hidden rounded-lg shadow-lg hover:shadow-xl duration-300 transition hover:scale-105`}>
-                                            <button className={`w-full h-full`} onClick={openImgInFullScreen(fileUrl)}>
-                                                <img className={`w-full h-40 object-cover`} src={fileUrl} alt={fileName}
-                                                     loading="eager"/>
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <a className={`flex w-full`} href={fileUrl}>
-                                            <FileExtension filename={decodeURI(fileName.split("-")[1])}/>
-                                            <strong className={`underline text-lg ml-5 text-blue-600 hover:text-blue-800 hover:cursor-pointer visited:text-purple-600`}>
-                                                {decodeURI(fileName.split("-")[1])}
-                                            </strong>
-                                        </a>
-                                    )}
-                                </div>
-                            );
-                        })}
+                        { images.map((image, index) => (
+                            <div className={`w-1/3 p-2 max-w-xs`}>
+                                <TaskImages
+                                    key={index}
+                                    openImgInFullScreen={openImgInFullScreen}
+                                    fileUrl={image}
+                                    fileName={image.split('/').pop().split('?')[0]}
+                                />
+                            </div>
+                        ))}
                     </div>
-                )}
+                }
+                {files.length > 0 && files.map((file, index) => (
+                    <TaskFiles
+                        fileUrl={file}
+                        fileName={file.split('/').pop().split('?')[0]}
+                    />
+                    ))
+                }
                 <div className={`w-full flex justify-end `}>
                     {props.loading ? (
                         <div className="w-24 h-10 bg-gray-300 rounded-xl animate-pulse"></div>

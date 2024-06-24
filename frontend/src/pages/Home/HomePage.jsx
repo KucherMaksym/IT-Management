@@ -51,7 +51,7 @@ const MyComponent = () => {
                         <p>Manage your company very simple</p>
                     </div>
                 }
-                {user && isAuthenticated && !company &&  <div className={`mt-20 flex justify-center items-center container`}>
+                {user && isAuthenticated && !company.company && <div className={`mt-20 flex justify-center items-center container`}>
                     <div className={`w-6/12`}>
                         <h2 className={`text-2xl`}>I am a new employee</h2>
                         <button className={`text-blue-700`} onClick={() => {

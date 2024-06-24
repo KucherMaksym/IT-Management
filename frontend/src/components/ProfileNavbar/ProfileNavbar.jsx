@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {memo, useState} from 'react';
 import {Link} from "react-router-dom";
 import {useSelector} from "react-redux";
 
-const MyComponent = () => {
+const ProfileNavbar = memo(() => {
 
     const {company} = useSelector(state => state.user);
 
@@ -43,6 +43,6 @@ const MyComponent = () => {
 
         </nav>
     );
-};
+});
 
-export default MyComponent;
+export default ProfileNavbar;

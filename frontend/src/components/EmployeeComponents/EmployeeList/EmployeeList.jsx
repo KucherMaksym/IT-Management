@@ -79,7 +79,7 @@ const MyComponent = () => {
         <div className="flex container w-screen flex-wrap p-4 ">
             {
                 employee.length > 0 && employee.map((employee) => (
-                    <EmployeeCard key={employee._id} setParams={openModal(employee._id)} {...employee}></EmployeeCard>
+                    <EmployeeCard key={employee._id} onClick={openModal(employee._id)} {...employee}></EmployeeCard>
                 ))
             }
             {isModalOpen && !loading && <Modal onClose={closeModal}>
