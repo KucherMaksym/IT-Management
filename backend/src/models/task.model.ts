@@ -17,7 +17,10 @@ export interface Task {
     bonus?: number,
     taken?: boolean
     takenBy?: string;
-    createdBy: string,
+    createdBy: {
+        _id: string,
+        avatar: string
+    }
     files?: string[];
 }
 
@@ -29,7 +32,10 @@ export const taskSchema = new Schema<Task>({
     bonus: {type: Number, default: 0},
     taken: {type: Boolean, default: false},
     takenBy: {type: String},
-    createdBy:{type: String, required: true},
+    createdBy: {
+        _id: {type: String, required: true},
+        avatar: {type: String, required: true},
+    },
     files: {type: [String]},
 },
 {

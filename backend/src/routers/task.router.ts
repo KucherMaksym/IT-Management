@@ -28,7 +28,7 @@ router.use(passport.session());
 
 router.get("/allTasks", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
     const id = req.user._id;
-    const allTasks = await TaskModel.find({takenBy: id});
+    const allTasks = await TaskModel.find({takenBy: id, status: TaskStatus.IN_PROGRESS});
     res.send(allTasks);
 }));
 
@@ -91,7 +91,10 @@ router.post("/newTask/:id", upload.array("files"), (req, res, next) => isAuthent
         description,
         deadline,
         takenBy: id,
-        createdBy: req.user._id,
+        createdBy: {
+            _id: req.user._id,
+            avatar: req.user.avatar
+        },
         status: TaskStatus.IN_PROGRESS
     };
 

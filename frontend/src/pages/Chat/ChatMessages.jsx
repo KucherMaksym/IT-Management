@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {useSelector} from "react-redux";
+import background from "./../../components/assets/back.jpg"
 
 const ChatMessages = (props) => {
     const inputRef = useRef(null);
@@ -23,6 +24,7 @@ const ChatMessages = (props) => {
     }
 
     useEffect(() => {
+        messageWindow.current.scroll({top: 1000000000, behavior: "instant"});
         const currentInputRef = inputRef.current;
         currentInputRef.addEventListener('input', handleTextAreaHeightChange);
         currentInputRef.focus()
@@ -66,7 +68,7 @@ const ChatMessages = (props) => {
                     </div>
                 </div>
             }
-            <div className="flex w-full flex-col h-full bg-gray-200 overflow-auto p-5" ref={messageWindow}>
+            <div className="flex w-full flex-col h-full bg-gray-200 overflow-auto p-5" ref={messageWindow} style={{backgroundImage: `url(${background})`}}>
                 {props.messages && props.messages.length > 0 ? (
                     props.messages.map((message, index) => (
                         <div key={index} className={`${message.sender === user._id ? "self-end" : "self-start"} 

@@ -13,7 +13,7 @@ const EmployeeCard = (props) => {
                     onClick={ props.onClick } >
                     <img className={`rounded-3xl`} src={props.avatar} alt={''} width={50} />
                     <div className={`flex flex-col w-8/12 h-full ml-4 items-start justify-center`}>
-                        <h3 className={`text-xl overflow-x-hidden w-full overflow-y-hidden text-start whitespace-nowrap text-ellipsis`}>{props.username}</h3>
+                        <h3 title={props.username} className={`text-xl overflow-x-hidden w-full overflow-y-hidden text-start whitespace-nowrap text-ellipsis`}>{props.username}</h3>
                         <div className={`flex flex-nowrap`}>
                             <p className={`mr-3 text-sm overflow-hidden text-ellipsis whitespace-nowrap`}>{props.role}</p>
                             {

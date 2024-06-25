@@ -13,7 +13,6 @@ const TaskList = () => {
     const [currentTask, setCurrentTask] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
     const [isImageOpened, setIsImageOpened] = useState(false);
-    const [currentAvatar, setCurrentAvatar] = useState(null);
 
     const handleNewDay = (e) => {
         setSelectedDay(e)
@@ -33,6 +32,7 @@ const TaskList = () => {
                 });
         }
     }
+
     useEffect(() => {
         if (localStorage.getItem("selectedTask") && localStorage.getItem("selectedTask") !== "undefined") {
             const savedTask = localStorage.getItem("selectedTask")
@@ -46,7 +46,6 @@ const TaskList = () => {
         setDates(taskDates);
 
     }, [tasks]);
-
 
     const clickTask = (id) => () => {
         const newSelectedTask = tasks.find((task) => task.id === id);
@@ -63,7 +62,6 @@ const TaskList = () => {
                         {isImageOpened ? document.body.classList.add("no-scroll") : document.body.classList.remove("no-scroll")}
                         {tasks.map((task, index) => (
                             <TaskCard
-                                setAvatar={setCurrentAvatar}
                                 isSelected={currentTask ? currentTask._id === task._id : false}
                                 index={index}
                                 key={task._id}
@@ -91,10 +89,8 @@ const TaskList = () => {
             <div className={`w-full flex my-10 items-center justify-center`}>
                 <Task
                     key={currentTask._id}
-                    avatar={currentAvatar}
                     isImageOpened={setIsImageOpened}
                     task={currentTask}
-                    {...currentTask}
                 />
             </div>
             )}

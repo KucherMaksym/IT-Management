@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
 import dayjs from "dayjs";
-import FileExtension from "../../../components/FileExtension/FileExtension";
 import axios from "axios";
 import ImageFullScreen from "../../ImageFullScreen/ImageFullScreen";
 import TaskImages from "./TaskImages/TaskImages";
@@ -15,13 +14,13 @@ const Task = (props) => {
     const taskComponent = useRef();
 
     const completeTask = () => {
-        axios.patch(`http://localhost:8000/api/tasks/accept/${props.id}`, {}, { withCredentials: true }).then(response => {
+        axios.patch(`http://localhost:8000/api/tasks/accept/${props.task.id}`, {}, { withCredentials: true }).then(response => {
             console.log(response.data);
         });
     };
 
     const acceptTask = () => {
-        axios.patch(`http://localhost:8000/api/tasks/accept/${props.id}`, {}, { withCredentials: true }).then(response => {
+        axios.patch(`http://localhost:8000/api/tasks/accept/${props.task.id}`, {}, { withCredentials: true }).then(response => {
             console.log(response.data);
         })
     }
@@ -63,10 +62,6 @@ const Task = (props) => {
         setFiles(newFiles);
         setImages(newImages);
 
-        console.log("files");
-        console.log(newFiles);
-        console.log("images");
-        console.log(newImages);
     }, [props.task.files]);
     return (
         <div className={`w-full lg:max-w-4xl h-full max-h-[700px] ${isTaskDivScrollable ? "overflow-y-scroll" : ""} bg-gray-200 rounded-xl `}  ref={taskComponent}>
@@ -76,19 +71,19 @@ const Task = (props) => {
                     {props.loading ? (
                         <div className="w-12 h-12 bg-gray-300 rounded-full mr-4 animate-pulse"></div>
                     ) : (
-                        <img src={props.avatar} alt={``} width={"50px"} style={{borderRadius: "50%"}} className={`mr-4`} />
+                        <img src={props.task.createdBy.avatar} alt={``} width={"50px"} style={{borderRadius: "50%"}} className={`mr-4`} />
                     )}
                     <h3 className={`text-xl font-semibold`}>
-                        {props.loading ? <div className="w-32 h-6 bg-gray-300 animate-pulse"></div> : props.name}
+                        {props.loading ? <div className="w-32 h-6 bg-gray-300 animate-pulse"></div> : props.task.name}
                     </h3>
                 </div>
                 <div className={`flex items-center`}>
                     <p className={`flex`}>
-                        deadline: <strong>{props.loading ? <div className="w-24 h-6 bg-gray-300 animate-pulse"> </div> : dayjs(props.deadline).format("YYYY-MM-DD")}</strong>
+                        deadline: <strong>{props.loading ? <div className="w-24 h-6 bg-gray-300 animate-pulse"> </div> : dayjs(props.task.deadline).format("YYYY-MM-DD")}</strong>
                     </p>
-                    {props.bonuses && (
+                    {props.task.bonuses && (
                         <p>
-                            bonuses: <strong>{props.loading ? <div className="w-24 h-6 bg-gray-300 animate-pulse"></div> : props.bonuses}</strong>
+                            bonuses: <strong>{props.loading ? <div className="w-24 h-6 bg-gray-300 animate-pulse"></div> : props.task.bonuses}</strong>
                         </p>
                     )}
                 </div>
@@ -103,7 +98,7 @@ const Task = (props) => {
                                 <div className="w-1/2 h-6 bg-gray-300 animate-pulse"></div>
                             </>
                         ) : (
-                            props.description
+                            props.task.description
                         )}
                     </p>
                 </div>

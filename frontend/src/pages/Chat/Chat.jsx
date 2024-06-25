@@ -25,6 +25,8 @@ const Chat = () => {
         })
 
         dispatch({ type: 'SET_USER', payload: selectedUser });
+        console.log(newRoom)
+        localStorage.setItem("Previous Chat", JSON.stringify(selectedUser));
 
         setSelectedUser(selectedUser);
         setRoom(newRoom);
@@ -72,6 +74,18 @@ const Chat = () => {
     useEffect(() => {
         if (!socket) return;
 
+        if (localStorage.getItem("Previous Chat")) {
+            const userInStorage = localStorage.getItem("Previous Chat");
+            setSelectedUser(JSON.parse(userInStorage));
+
+            const userIDs = [user._id, JSON.parse(userInStorage)._id];
+            const room = userIDs.sort().join("-");
+
+            axios.get("http://localhost:8000/api/chat/" + room, {withCredentials: true}).then((response) => {
+                setMessages(response.data)
+            })
+        }
+
         socket.on("new message", (message) => {
             setMessages((prevState) => [...prevState, message]);
         });
@@ -80,12 +94,6 @@ const Chat = () => {
             socket.off("new message");
         };
     }, [socket]);
-
-    // useEffect(() => {
-    //     if (chat.user) {
-    //         handleSelectUser(chat.user);
-    //     }
-    // }, [chat.user]);
 
     return (
         <div className={`w-full flex`}>
