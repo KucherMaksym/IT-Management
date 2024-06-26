@@ -1,12 +1,15 @@
 import React from 'react';
 import {Link} from "react-router-dom";
 import unknownPerson from "./../../../components/assets/unknownPerson.jpg"
+import dayjs from "dayjs";
+import DifferenceBetweenTwoDates from "../../../components/DifferenceBetweenTwoDates/DifferenceBetweenTwoDates";
 
 const TaskCard = (props) => {
 
     return (
 
-            <Link className={` w-full flex h-28  ${props.isConsideration ? "border-b-2" : "border-2 border-t-0"} border-gray-300 px-4 items-center transition-transform hover:scale-105 hover:border-t-2  ${props.index !== 0 ? "rounded-none " : "border-t-2 rounded-t-md"} ${props.isSelected ?  "bg-blue-100" : "bg-gray-100"}` } to={`?${props._id}`} onClick={props.onClick}>
+            <Link className={`relative w-full flex min-h-[112px] hover:border-b-2 border-gray-300 px-4 items-center transition-transform hover:scale-105 hover:border-t-2 rounded-none ${props.index === 0 ? "border-t-0" : "border-t-2"} ${props.isSelected ?  "bg-blue-100" : "bg-gray-100"}` } to={`?${props._id}`} onClick={props.onClick}>
+               <DifferenceBetweenTwoDates deadline={props.deadline} unit={"days"} />
                 <div className={`min-w-20 mr-4 flex justify-center items-center`}>
                     { props.createdBy.avatar ?
                         <img src={props.createdBy.avatar} alt="" className="rounded-full max-w-16" />

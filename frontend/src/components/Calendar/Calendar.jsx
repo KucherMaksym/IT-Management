@@ -70,9 +70,6 @@ const CustomDay = forwardRef(({ day, outsideCurrentMonth, highlightedDates, ...p
                     zIndex: "1",
                     transition: "all 0,2s",
                 },
-                //'&:hover, &:focus': {
-                //    backgroundColor: isHighlighted ? '#c60055' : 'rgba(0,0,0,0.08)',
-                //},
             }}
         />
     );
@@ -85,7 +82,7 @@ export default function StaticDatePickerWithHighlight({ highlightedDates, select
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <StaticDatePicker
                     orientation="portrait"
-                    disablePast={true}
+                    // disablePast={true}
                     value={selectedDay}
                     onChange={onChange}
                     slots={{

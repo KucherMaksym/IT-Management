@@ -58,7 +58,7 @@ const TaskList = () => {
         <div className={`flex container h-[calc(100vh_-_106px)] flex-col items-center justify-center-700 p-3`}>
             {tasks.length > 0  && !loading ?
                 <div className="flex flex-col-reverse w-full max-w-4xl items-center lg:flex-row mt-10">
-                    <div className=" lg:w-5/12 flex items-center bg-gray-200 h-full justify-start flex-col">
+                    <div className="max-h-[600px] border-2 border-gray-300 overflow-x-hidden overflow-y-scroll lg:w-6/12 flex items-center bg-gray-200 h-full justify-start flex-col">
                         {isImageOpened ? document.body.classList.add("no-scroll") : document.body.classList.remove("no-scroll")}
                         {tasks.map((task, index) => (
                             <TaskCard
@@ -71,7 +71,7 @@ const TaskList = () => {
                             />
                         ))}
                     </div>
-                    <div className="w-7/12 flex flex-col lg:items-end justify-center">
+                    <div className="w-6/12 flex flex-col lg:items-end justify-center">
                         <StaticDatePickerWithHighlight onChange={handleNewDay} selectedDay={selectedDay}
                                                        highlightedDates={dates}/>
                     </div>
