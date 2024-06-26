@@ -42,7 +42,7 @@ function App() {
                     </Route>
 
                     <Route path={"/profile"} element={<CompanyRouter/>}>
-                        <Route path="messages" element={<Chat/>} />
+                        <Route path="chat/:userId?" element={<Chat/>} />
                         <Route path="tasks" element={<TaskList />} />
                     </Route>
 

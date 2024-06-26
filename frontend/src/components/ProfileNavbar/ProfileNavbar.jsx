@@ -22,8 +22,8 @@ const ProfileNavbar = memo(() => {
             <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "tasks" ? "text-sky-600" : ""}`} to="/profile/tasks" onClick={() => changeTab("tasks")}>
                 Tasks
             </Link>
-            <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "messages" ? "text-sky-600" : ""}`} to="/profile/messages" onClick={() => changeTab("messages")}>
-                Messages
+            <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "chat" ? "text-sky-600" : ""}`} to="/profile/chat" onClick={() => changeTab("chat")}>
+                Chat
             </Link>
             <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "stars" ? "text-sky-600" : ""}`} to="/profile/stars" onClick={() => changeTab("stars")}>
                 Stars

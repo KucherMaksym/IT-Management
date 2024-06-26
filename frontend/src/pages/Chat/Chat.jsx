@@ -4,12 +4,15 @@ import EmployeeChatList from "./EmployeeChatList";
 import { useDispatch, useSelector } from "react-redux";
 import ChatMessages from "./ChatMessages";
 import axios from "axios";
+import {useSearchParams} from "react-router-dom";
 
 const Chat = () => {
     const [socket, setSocket] = useState(null);
     const [messages, setMessages] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [room, setRoom] = useState(null);
+
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const { user } = useSelector((state) => state.user);
     const dispatch = useDispatch();
@@ -25,8 +28,9 @@ const Chat = () => {
         })
 
         dispatch({ type: 'SET_USER', payload: selectedUser });
-        console.log(newRoom)
         localStorage.setItem("Previous Chat", JSON.stringify(selectedUser));
+
+        setSearchParams({["user"]: selectedUser._id});
 
         setSelectedUser(selectedUser);
         setRoom(newRoom);
@@ -74,7 +78,19 @@ const Chat = () => {
     useEffect(() => {
         if (!socket) return;
 
-        if (localStorage.getItem("Previous Chat")) {
+        if (searchParams.get("user")) {
+            axios.get("http://localhost:8000/api/users/" + searchParams.get("user"), {withCredentials: true}).then((response) => {
+                const userIDs = [user._id, response.data._id];
+                const room = userIDs.sort().join("-");
+                setSelectedUser(response.data)
+
+                axios.get("http://localhost:8000/api/chat/" + room, {withCredentials: true}).then((response) => {
+                    setMessages(response.data)
+                })
+            });
+
+
+        } else if (localStorage.getItem("Previous Chat")) {
             const userInStorage = localStorage.getItem("Previous Chat");
             setSelectedUser(JSON.parse(userInStorage));
 
