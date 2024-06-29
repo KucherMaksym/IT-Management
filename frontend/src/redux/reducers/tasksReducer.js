@@ -1,4 +1,4 @@
-import {FETCH_TASKS_FAILURE, FETCH_TASKS_REQUEST, FETCH_TASKS_SUCCESS} from "../actions/tasksActions";
+import {FETCH_TASKS_FAILURE, FETCH_TASKS_REQUEST, FETCH_TASKS_SUCCESS, REMOVE_TASK} from "../actions/tasksActions";
 
 
 const initialState = {
@@ -26,6 +26,11 @@ const tasksReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
                 error: action.payload,
+            }
+        case REMOVE_TASK:
+            return {
+                ...state,
+                tasks: state.tasks.filter((task) => task._id !== action.payload),
             }
         default: return state;
     }

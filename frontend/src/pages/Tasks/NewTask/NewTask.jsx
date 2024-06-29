@@ -2,8 +2,21 @@ import React, { useState } from 'react';
 import StaticDatePickerLandscape from "../../../components/Calendar/Calendar";
 import Input from "../../../components/Input/Input";
 import classes from "./NewTask.module.css";
-import axios from "axios";
 import { useParams } from "react-router-dom";
+import { useMutation } from 'react-query';
+import axios from "axios";
+import {Bounce, toast, ToastContainer} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const createNewTask = async (taskData) => {
+    const response = await axios.post(`http://localhost:8000/api/tasks/newTask/${taskData.id}`, taskData.formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        },
+        withCredentials: true
+    });
+    return response.data;
+};
 
 const NewTask = () => {
     const [newTask, setNewTask] = useState({
@@ -17,7 +30,6 @@ const NewTask = () => {
 
     const handleNewTask = (event) => {
         setNewTask({...newTask, [event.target.name]: event.target.value});
-        console.log(newTask);
     };
 
     const handleNewDay = (e) => {
@@ -28,7 +40,28 @@ const NewTask = () => {
         setFiles(e.target.files);
     };
 
-    const sendNewTask = async () => {
+
+    const mutation = useMutation(createNewTask, {
+        onSuccess: (data) => {
+            toast.success("Task Created", {
+                position: "bottom-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
+            console.log('Task created successfully:', data);
+        },
+        onError: (error) => {
+            console.error('Error uploading the task:', error);
+        }
+    });
+
+    const sendNewTask = () => {
         if (!newTask.name || !newTask.description) {
             return console.log("Введи описание и название задачи");
         }
@@ -42,27 +75,18 @@ const NewTask = () => {
             formData.append('files', files[i]);
         }
 
-        try {
-            const response = await axios.post(`http://localhost:8000/api/tasks/newTask/${id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
-                withCredentials: true
-            });
-            console.log(response.data);
-        } catch (error) {
-            console.error('Error uploading the task:', error);
-        }
+        mutation.mutate({ id, formData });
     };
 
     return (
-        <div className={`container max-w-screen-xl mt-10 flex items-center justify-center`} style={{ height: `calc(100vh-12)` }}>
+        <div className={`container max-w-screen-xl mt-10 flex items-center justify-center`} style={{ height: `calc(100vh - 12)` }}>
+
             <div className={`w-5/12 flex items-center justify-center`} style={{ width: "" }}>
                 <StaticDatePickerLandscape onChange={handleNewDay} value={selectedDay} />
             </div>
-            <div className={`w-7/12 flex h-full flex-col items-center `}>
+            <div className={`w-7/12 flex h-full flex-col items-center`}>
                 <Input label="Task name" name={"name"} value={newTask["name"]} onChange={handleNewTask} />
-                <div className={` h-full flex mt-10 w-full justify-center`}>
+                <div className={`h-full flex mt-10 w-full justify-center`}>
                     <div className={`relative w-6/12`}>
                         <textarea
                             className={`${classes.textarea} max-h-60 min-h-60 w-full bg-gray-300 resize-none outline-0 rounded-2xl p-2 border-gray-50`}
@@ -71,7 +95,7 @@ const NewTask = () => {
                             onChange={handleNewTask}
                         ></textarea>
                         <label
-                            className={` ${classes.label} absolute top-5 text-gray-700 m-3 ${newTask.description ? `${classes.focused}` : ""}`}
+                            className={`${classes.label} absolute top-5 text-gray-700 m-3 ${newTask.description ? `${classes.focused}` : ""}`}
                         >
                             Description
                         </label>
@@ -84,7 +108,9 @@ const NewTask = () => {
                         multiple
                         onChange={handleFileChange}
                     />
-                    <button className={`bg-blue-500 text-white rounded-xl p-1 w-16`} onClick={sendNewTask}>Send</button>
+                    <button className={`bg-blue-500 text-white rounded-xl p-1 w-16`} onClick={sendNewTask} disabled={mutation.isLoading}>
+                        {mutation.isLoading ? 'Sending...' : 'Send'}
+                    </button>
                 </div>
             </div>
         </div>

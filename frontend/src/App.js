@@ -12,11 +12,12 @@ import NotFound from "./pages/NotFound/NotFound";
 import NewTask from "./pages/Tasks/NewTask/NewTask";
 import TaskList from "./pages/Tasks/TaskList/TaskList";
 import {getProfile} from "./redux/actions/userActions";
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 import {useDispatch} from "react-redux";
 import ConsiderationPage from "./pages/ConsiderationPage/Consideration";
 import Chat from "./pages/Chat/Chat";
 import CompanyRouter from "./components/Routes/CompanyRouter";
+import {ToastContainer} from "react-toastify";
 
 
 function App() {
@@ -31,6 +32,18 @@ function App() {
 
     return (
         <div className="App flex flex-col items-center">
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
                 <Header />
                 <Routes>
                     <Route path="/" element={<HomePage />} />

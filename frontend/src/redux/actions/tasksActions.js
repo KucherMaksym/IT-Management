@@ -4,6 +4,7 @@ import axios from "axios";
 export const FETCH_TASKS_REQUEST = "FETCH_TASKS_REQUEST";
 export const FETCH_TASKS_SUCCESS = "FETCH_TASKS_SUCCESS";
 export const FETCH_TASKS_FAILURE = "FETCH_TASKS_FAILURE";
+export const REMOVE_TASK = "REMOVE_TASK";
 
 
 export const fetchTasksRequest = () => ({
@@ -18,6 +19,11 @@ export const fetchTasksSuccess = (tasks) => ({
 export const fetchTasksFailure = (error) => ({
     type: FETCH_TASKS_FAILURE,
     payload: error,
+})
+
+export const removeTask = (taskId) => ({
+    type: REMOVE_TASK,
+    payload: taskId,
 })
 
 export const getTasks = () => {

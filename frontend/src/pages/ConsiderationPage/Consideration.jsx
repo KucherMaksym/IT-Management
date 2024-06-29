@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import TaskCard from "../Tasks/TaskCard/TaskCard";
 import Task from "../Tasks/Task/Task";
+import {removeTask} from "../../redux/actions/tasksActions";
+import {Bounce, toast, ToastContainer} from "react-toastify";
 
 const ConsiderationPage = () => {
     const [tasks, setTasks] = useState([]);
@@ -19,6 +21,22 @@ const ConsiderationPage = () => {
     const clickTask = (id) => () => {
         setCurrentTask(tasks.find(task => task._id === id))
     };
+
+    const handleAcceptTask = () => {
+        toast.success('✔️ Task Accepted!', {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+        });
+        setTasks((prevState) => prevState.filter((element) => {return element !== currentTask}))
+        setCurrentTask(null);
+    }
 
     useEffect(() => {
         getAllConsiderationTasks();
@@ -43,7 +61,7 @@ const ConsiderationPage = () => {
                     ))}
                 </div>
                 <div className="w-full flex items-center justify-center">
-                    {currentTask ? (
+                    {currentTask && (
                         <Task
                             isConsideration={true}
                             key={currentTask._id}
@@ -51,10 +69,9 @@ const ConsiderationPage = () => {
                             isImageOpened={setIsImageOpened}
                             task={currentTask}
                             loading={loading}
+                            completeTask={handleAcceptTask}
                             {...currentTask}
                         />
-                    ) : (
-                        loading && <Task loading={true} task={{files: []}}/>
                     )}
                 </div>
             </div>

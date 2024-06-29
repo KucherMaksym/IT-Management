@@ -1,4 +1,4 @@
-import React, {memo, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
 import {useSelector} from "react-redux";
 
@@ -10,7 +10,16 @@ const ProfileNavbar = memo(() => {
 
     const changeTab = (value) => {
         setTab(value)
+        localStorage.setItem("previous tab", (value));
     }
+
+    useEffect(() => {
+        const previousTab =localStorage.getItem("previous tab")
+        if (previousTab) {
+            changeTab(previousTab);
+        }
+    }, []);
+
 
 
 

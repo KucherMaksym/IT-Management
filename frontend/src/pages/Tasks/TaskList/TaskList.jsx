@@ -6,6 +6,7 @@ import Task from "../Task/Task";
 import dayjs from "dayjs";
 import {useSelector} from "react-redux";
 import noTasks from "./../../../components/assets/noTasks.png"
+import {Bounce, toast, ToastContainer} from "react-toastify";
 
 const TaskList = () => {
     const {tasks, loading} = useSelector((state) => state.tasks);
@@ -54,6 +55,21 @@ const TaskList = () => {
         localStorage.setItem("selectedTask", id);
     }
 
+    const handleCompleteTask = () => {
+        setCurrentTask(null);
+        toast.success('Task Completed!', {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+        });
+    }
+
     return (
         <div className={`flex container h-[calc(100vh_-_106px)] flex-col items-center justify-center-700 p-3`}>
             {tasks.length > 0  && !loading ?
@@ -91,6 +107,7 @@ const TaskList = () => {
                     key={currentTask._id}
                     isImageOpened={setIsImageOpened}
                     task={currentTask}
+                    completeTask={handleCompleteTask}
                 />
             </div>
             )}
