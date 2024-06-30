@@ -1,14 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {useSelector} from "react-redux";
 import background from "./../../components/assets/back.jpg"
+import Message from "./Message";
 
 const ChatMessages = (props) => {
     const inputRef = useRef(null);
     const messageWindow = useRef(null);
 
     const [textAreaHeight, setTextAreaHeight] = useState(0);
-
-    const {user} = useSelector((state) => state.user);
 
     const sendMessage = () => {
         if (inputRef.current.innerText === "") return;
@@ -71,13 +69,7 @@ const ChatMessages = (props) => {
             <div className="flex w-full flex-col h-full bg-gray-200 overflow-auto p-5" ref={messageWindow} style={{backgroundImage: `url(${background})`}}>
                 {props.messages && props.messages.length > 0 ? (
                     props.messages.map((message, index) => (
-                        <div key={index} className={`${message.sender === user._id ? "self-end" : "self-start"} 
-                            rounded-3xl max-w-lg ${message.sender === user._id ? "bg-sky-400" : "bg-gray-500"}  py-1 px-2 
-                            ${index > 0 && props.messages[index-1].sender === message.sender ? "mt-1" : "mt-5"} `}>
-                            <p className="text-white break-words text-start max-w-lg font-semibold">
-                                {message.text}
-                            </p>
-                        </div>
+                        <Message handleMessageSeen={props.handleMessageSeen} key={message._id} messages={props.messages} message={message} index={index}/>
                     ))
                 ) : null}
             </div>
