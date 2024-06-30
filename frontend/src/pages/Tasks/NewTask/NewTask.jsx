@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import StaticDatePickerLandscape from "../../../components/Calendar/Calendar";
 import Input from "../../../components/Input/Input";
 import classes from "./NewTask.module.css";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import { useMutation } from 'react-query';
 import axios from "axios";
 import {Bounce, toast, ToastContainer} from "react-toastify";
@@ -27,6 +27,8 @@ const NewTask = () => {
     const [files, setFiles] = useState([]);
 
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const handleNewTask = (event) => {
         setNewTask({...newTask, [event.target.name]: event.target.value});
@@ -54,7 +56,12 @@ const NewTask = () => {
                 theme: "light",
                 transition: Bounce,
             });
-            console.log('Task created successfully:', data);
+            const returnTo = searchParams.get('returnTo');
+            if (returnTo) {
+                navigate(returnTo);
+            } else {
+                navigate('/');  // Пример дефолтного перенаправления
+            }
         },
         onError: (error) => {
             console.error('Error uploading the task:', error);
@@ -62,8 +69,18 @@ const NewTask = () => {
     });
 
     const sendNewTask = () => {
-        if (!newTask.name || !newTask.description) {
-            return console.log("Введи описание и название задачи");
+        if (!newTask.name || !newTask.description || !selectedDay) {
+            return toast.error('Write the name, description and select the deadline of new task', {
+                position: "bottom-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
         }
 
         const formData = new FormData();

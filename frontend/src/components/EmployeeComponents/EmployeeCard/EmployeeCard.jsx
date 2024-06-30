@@ -4,6 +4,8 @@ import {Link, useLocation, useSearchParams} from 'react-router-dom';
 
 const EmployeeCard = (props) => {
 
+    const location = useLocation();
+
 
     return (
         <div className={`w-full ${props.isChat ? "" : "p-3" } `}>
@@ -30,7 +32,7 @@ const EmployeeCard = (props) => {
                     !props.isChat && (
                 <div className={`w-4/12 flex items-center`}>
                     <div className={`w-6/12`}>
-                        <Link to={`/company/newTask/${props._id}`} className={`text-2xl`} title={`New Task`}>
+                        <Link to={`/company/newTask/${props._id}?returnTo=${encodeURIComponent(location.pathname)}`} className={`text-2xl`} title={`New Task`}>
                             📝
                         </Link>
                     </div>
