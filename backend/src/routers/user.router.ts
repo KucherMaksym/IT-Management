@@ -24,7 +24,6 @@ router.patch("/changeRole", (req, res, next) => isAuthenticated(req, res, next),
             res.status(404).send({ error: "Forbidden" });
         } else {
             const roleChanged = await UserModel.findByIdAndUpdate(userToChangeRole, { role: newRole });
-            console.log(roleChanged)
             res.send(roleChanged);
         }
     } else {

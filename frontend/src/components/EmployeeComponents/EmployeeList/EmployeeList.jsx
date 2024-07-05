@@ -3,10 +3,10 @@ import axios from "axios";
 import EmployeeCard from "../EmployeeCard/EmployeeCard";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import Modal from "../../Modal/Modal";
+import {useMutation, useQueryClient} from "react-query";
 
-const MyComponent = () => {
+const MyComponent = ({employees}) => {
 
-    const [employee, setEmployee] = useState([]);
     let [searchParams, setSearchParams] = useSearchParams();
     const modalId = searchParams.get('modal');
     const navigate = useNavigate();
@@ -14,6 +14,7 @@ const MyComponent = () => {
     const [currentUserModal, setCurrentUserModal] = useState(null);
     const [newRole, setNewRole] = useState();
     const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
 
     const getEmployee = (id) => {
         if (id) {
@@ -35,13 +36,23 @@ const MyComponent = () => {
         }
     }
 
+    const dismissEmployee = async (employeeId) => {
+        const response = await axios.patch(`http://localhost:8000/api/companies/dismiss/${employeeId}`, {}, {withCredentials: true});
+        return response.data;
+    }
 
-    const getAllEmployees = () => {
-        axios.get("http://localhost:8000/api/companies/allEmployees", {withCredentials: true}).then((response) => {
-            if (response.data) {
-                setEmployee(response.data);
-            }
-        })
+    const dismissMutation = useMutation({
+        mutationFn: dismissEmployee,
+        onSuccess: () => {
+            queryClient.invalidateQueries("employees");
+        },
+        onError: (err) =>{
+            console.log(err);
+        }
+    });
+
+    const handleDismissEmployee = (employeeId) => {
+        dismissMutation.mutate(employeeId);
     }
 
     const changeRole = () => {
@@ -55,7 +66,6 @@ const MyComponent = () => {
     }
 
     useEffect(() => {
-        getAllEmployees();
         if (modalId) {
             getEmployee(modalId);
         }
@@ -78,7 +88,7 @@ const MyComponent = () => {
     return (
         <div className="flex container w-screen flex-wrap p-4 ">
             {
-                employee.length > 0 && employee.map((employee) => (
+                employees && employees.length > 0 && employees.map((employee) => (
                     <div className={`w-6/12`}>
                         <EmployeeCard key={employee._id} onClick={openModal(employee._id)} {...employee}></EmployeeCard>
                     </div>
@@ -116,6 +126,9 @@ const MyComponent = () => {
 
                         </form>
 
+                        <div className={`mt-5 flex flex-col items-center`}>
+                            <button className={`bg-red-600 text-white rounded-md px-2 py-1.5`} onClick={() => handleDismissEmployee((currentUserModal._id))}>Dismiss</button>
+                        </div>
                     </div> : <div>no info</div>
                 }
 

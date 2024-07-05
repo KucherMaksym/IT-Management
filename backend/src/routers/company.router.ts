@@ -37,7 +37,6 @@ router.get("/findUserCompany", (req, res, next) => isAuthenticated(req, res, nex
 
 
 router.post("/newCompany",  asyncHandler( async (req: express.Request, res: express.Response) => {
-    console.log(req.body);
     const newCompany = await CompanyModel.create(req.body);
     res.send(newCompany);
 }))
@@ -87,6 +86,18 @@ router.patch("/addNewEmployee",  (req, res, next) => isAuthenticated(req, res, n
         { $push: { employees: newEmployee } }
     );
     res.send(newCompany);
+}))
+
+router.patch("/dismiss/:employeeId", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+
+    const employeeId = req.params.employeeId;
+    console.log(employeeId);
+
+    const updatedCompany = await CompanyModel.findOneAndUpdate({employees: employeeId}, {$pull: { employees: employeeId }}, {new: true})
+    console.log("opa")
+    console.log(updatedCompany)
+    res.status(200).send(true);
+
 }))
 
 export default router;

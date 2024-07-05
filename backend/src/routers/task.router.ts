@@ -42,7 +42,6 @@ router.get("/allConsiderationTasks", (req, res, next) => isAuthenticated(req, re
 router.get("/:id", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
     const id = req.params.id;
     const user = await UserModel.findById(req.user._id);
-    console.log(user);
 
     if (!user?.activeTasks?.includes(id) && !user?.considerationTasks?.includes(id)) {
         if (req.user.role !== Roles.ADMIN && req.user.role !== Roles.MANAGER ) {
