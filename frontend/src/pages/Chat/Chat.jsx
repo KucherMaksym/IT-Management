@@ -8,6 +8,7 @@ import { useSearchParams } from "react-router-dom";
 
 const Chat = () => {
     const [socket, setSocket] = useState(null);
+    const [allEmployees, setAllEmployees] = useState([]);
     const [messages, setMessages] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [room, setRoom] = useState(null);
@@ -105,8 +106,10 @@ const Chat = () => {
             });
         } else if (localStorage.getItem("Previous Chat")) {
             const userInStorage = JSON.parse(localStorage.getItem("Previous Chat"));
-            setSelectedUser(userInStorage);
-            fetchMessages(userInStorage._id);
+            if (allEmployees?.includes(userInStorage)) {
+                setSelectedUser(userInStorage);
+                fetchMessages(userInStorage._id);
+            }
         }
 
         const handleMessage = (message) => {
@@ -135,15 +138,17 @@ const Chat = () => {
     return (
         <div className="w-full flex">
             <div className="flex flex-col md:w-[400px] md:min-w-[400px] border-r-2 overflow-y-scroll">
-                <EmployeeChatList onSelectUser={handleSelectUser} />
+                <EmployeeChatList allEmployees={allEmployees} setAllEmployees={setAllEmployees} onSelectUser={handleSelectUser} />
             </div>
             <div className="flex flex-col justify-start md:w-[calc(100%-400px)] flex-grow">
-                <ChatMessages
-                    handleMessageSeen={handleMessageSeen}
-                    messages={messages}
-                    onNewMessage={handleNewMessage}
-                    selectedUser={selectedUser}
-                />
+
+                    <ChatMessages
+                        handleMessageSeen={handleMessageSeen}
+                        messages={messages}
+                        onNewMessage={handleNewMessage}
+                        selectedUser={selectedUser}
+                    />
+
             </div>
         </div>
     );

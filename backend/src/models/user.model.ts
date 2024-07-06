@@ -27,7 +27,8 @@ export interface User {
     activeTasks?: string[];
     considerationTasks?: Task[];
     groups?: string[];
-    bonuses?: number;\
+    bonuses?: number;
+    accessToken: string;
 }
 
 
@@ -44,7 +45,7 @@ export const UserSchema = new Schema<User>({
     activeTasks: {type: [String]},
     considerationTasks: {type: [String]},
     bonuses:{type: Number, default: 0},
-
+    accessToken: {type: String, required: true}
 })
 
 

@@ -19,16 +19,16 @@ const MyComponent = ({employees}) => {
     const getEmployee = (id) => {
         if (id) {
             try {
-                setLoading(true); // Установите loading в true перед запросом
+                setLoading(true);
                 axios.get(`http://localhost:8000/api/users/${id}`, {withCredentials: true})
                     .then((response) => {
-                        setCurrentUserModal(response.data); // Установите текущего сотрудника
+                        setCurrentUserModal(response.data);
                     })
                     .catch((err) => {
                         console.log(err);
                     })
                     .finally(() => {
-                        setLoading(false); // Установите loading в false после запроса
+                        setLoading(false);
                     });
             } catch (err) {
                 console.log(err);

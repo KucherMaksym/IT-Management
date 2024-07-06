@@ -66,7 +66,8 @@ passport.use(new GitHubStrategy({
             const createUser = await UserModel.create({
                 username: profile.username,
                 role: Roles.OTHER,
-                avatar: profile.photos?.[0]?.value ?? "default-logo.png"
+                avatar: profile.photos?.[0]?.value ?? "default-logo.png",
+                accessToken: accessToken
             }).then((res) => {
                 newUser = res;
                 return done(null, newUser);

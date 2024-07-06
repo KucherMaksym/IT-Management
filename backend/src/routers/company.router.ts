@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler"
 import {CompanyModel} from "../models/company.model";
 import {authenticateJWT} from "../middlewares/middlewares.middleware";
 import passport from "passport";
-import {UserModel} from "../models/user.model";
+import {Roles, User, UserModel} from "../models/user.model";
 import mongoose from "mongoose";
 
 const router = Router();
@@ -38,6 +38,8 @@ router.get("/findUserCompany", authenticateJWT, asyncHandler(async (req: any, re
 
 router.post("/newCompany", asyncHandler(async (req: express.Request, res: express.Response) => {
     const newCompany = await CompanyModel.create(req.body);
+    const user = req.user as User;
+    await UserModel.findOneAndUpdate({_id: user._id}, {role: Roles.ADMIN})
     res.send(newCompany);
 }))
 
