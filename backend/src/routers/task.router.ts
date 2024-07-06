@@ -1,12 +1,12 @@
 import express, {Router} from 'express';
 import passport from "passport";
-import {isAuthenticated, isTeamLead} from "../middlewares/middlewares.middleware";
+import {authenticateJWT, isTeamLead} from "../middlewares/middlewares.middleware";
 import asyncHandler from "express-async-handler";
 import {Roles, UserModel} from "../models/user.model";
 import {Task, TaskModel, TaskStatus} from "../models/task.model";
 import multer from "multer";
 import path from "node:path";
-import {disconnect, startSession} from "mongoose";
+import {startSession} from "mongoose";
 
 const admin = require("firebase-admin");
 const serviceAccount = require("./../firebase-key.json");
@@ -21,30 +21,30 @@ const bucket = admin.storage().bucket();
 const router = Router();
 
 const storage = multer.memoryStorage(); // Использование памяти для хранения загружаемых файлов
-const upload = multer({ storage });
+const upload = multer({storage});
 
 router.use(passport.initialize());
 router.use(passport.session());
 
-router.get("/allTasks", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/allTasks", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const id = req.user._id;
     const allTasks = await TaskModel.find({takenBy: id, status: TaskStatus.IN_PROGRESS});
     res.send(allTasks);
 }));
 
-router.get("/allConsiderationTasks", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/allConsiderationTasks", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
 
     const tasks = await TaskModel.find({status: TaskStatus.CONSIDERATION})
     res.send(tasks);
 
 }))
 
-router.get("/:id", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/:id", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const id = req.params.id;
     const user = await UserModel.findById(req.user._id);
 
     if (!user?.activeTasks?.includes(id) && !user?.considerationTasks?.includes(id)) {
-        if (req.user.role !== Roles.ADMIN && req.user.role !== Roles.MANAGER ) {
+        if (req.user.role !== Roles.ADMIN && req.user.role !== Roles.MANAGER) {
             res.status(404).send({response: "Task not found"});
             return;
         }
@@ -66,15 +66,15 @@ router.get('/taskByDate/:date', async (req, res) => {
         if (tasks.length > 0) {
             res.json(tasks[0]);
         } else {
-            res.status(404).json({ message: 'No tasks found for this date' });
+            res.status(404).json({message: 'No tasks found for this date'});
         }
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({message: 'Server error', error});
     }
 });
 
-router.post("/newTask/:id", upload.array("files"), (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
-    const { name, description, deadline } = req.body;
+router.post("/newTask/:id", upload.array("files"), authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
+    const {name, description, deadline} = req.body;
     const id = req.params.id;
     console.log(req.files);
 
@@ -85,7 +85,7 @@ router.post("/newTask/:id", upload.array("files"), (req, res, next) => isAuthent
         return;
     }
 
-    let task:Task = {
+    let task: Task = {
         name,
         description,
         deadline,
@@ -126,11 +126,11 @@ router.post("/newTask/:id", upload.array("files"), (req, res, next) => isAuthent
         res.status(500).send("Task not created");
         return;
     }
-    const updatedUser = await UserModel.findByIdAndUpdate(id, { $push: { activeTasks: taskDb._id } }, { new: true });
+    const updatedUser = await UserModel.findByIdAndUpdate(id, {$push: {activeTasks: taskDb._id}}, {new: true});
     res.status(200).send(updatedUser);
 }));
 
-router.get("/download/:fileName", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/download/:fileName", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const fileName = req.params.fileName;
     const file = bucket.file(`uploads/${fileName}`);
 
@@ -138,17 +138,17 @@ router.get("/download/:fileName", (req, res, next) => isAuthenticated(req, res, 
         action: 'read',
         expires: '03-09-2491'
     }).then((signedUrls: any[]) => {
-        res.json({ url: signedUrls[0] });
+        res.json({url: signedUrls[0]});
     }).catch((error: any) => {
-        res.status(500).send({ error: 'Failed to get signed URL', details: error });
+        res.status(500).send({error: 'Failed to get signed URL', details: error});
     });
 }));
 
-router.patch("/complete/:id", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
-    const id = req.params.id;
+router.patch("/complete/:id", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
+        const id = req.params.id;
 
         try {
-            const updatedTask = await TaskModel.findByIdAndUpdate(id, { status: TaskStatus.CONSIDERATION }, { new: true });
+            const updatedTask = await TaskModel.findByIdAndUpdate(id, {status: TaskStatus.CONSIDERATION}, {new: true});
 
             const user = await UserModel.findById(updatedTask?.takenBy);
 
@@ -167,7 +167,7 @@ router.patch("/complete/:id", (req, res, next) => isAuthenticated(req, res, next
     })
 );
 
-router.patch("/accept/:id", isTeamLead, (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.patch("/accept/:id", isTeamLead, authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const taskId = req.params.id;
     const user = await UserModel.findOne({considerationTasks: taskId});
 
@@ -179,7 +179,7 @@ router.patch("/accept/:id", isTeamLead, (req, res, next) => isAuthenticated(req,
 
     try {
         const updatedUser = await UserModel.findByIdAndUpdate(user?._id, {
-            $pull : {considerationTasks: taskId},
+            $pull: {considerationTasks: taskId},
             $push: {completedTasks: taskId}
         }, {session, new: true});
         const updatedTask = await TaskModel.findByIdAndUpdate(taskId, {

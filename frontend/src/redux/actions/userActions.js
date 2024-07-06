@@ -35,6 +35,7 @@ export const getProfile = () => {
         dispatch(fetchUserRequest());
         try {
             const response = await axios.get("http://localhost:8000/profile", { withCredentials: true });
+            console.log(response.data)
             const user = response.data;
             if (user.isAuthenticated === false) {
                 throw new Error("User is not Authenticated");

@@ -1,7 +1,7 @@
 import express, {response, Router} from 'express'
 import asyncHandler from "express-async-handler"
 import {CompanyModel} from "../models/company.model";
-import {isAuthenticated} from "../middlewares/middlewares.middleware";
+import {authenticateJWT} from "../middlewares/middlewares.middleware";
 import passport from "passport";
 import {UserModel} from "../models/user.model";
 import mongoose from "mongoose";
@@ -11,7 +11,7 @@ const router = Router();
 router.use(passport.initialize());
 router.use(passport.session());
 
-router.get("/allEmployees", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/allEmployees", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     try {
         let company = await CompanyModel.findOne({admin: req.user._id});
 
@@ -22,7 +22,7 @@ router.get("/allEmployees", (req, res, next) => isAuthenticated(req, res, next),
             res.status(404).send("Company is not found");
             return;
         }
-        const employees = await UserModel.find({ '_id': { $in: company.employees } });
+        const employees = await UserModel.find({'_id': {$in: company.employees}});
 
         res.send(employees);
     } catch (err) {
@@ -30,25 +30,25 @@ router.get("/allEmployees", (req, res, next) => isAuthenticated(req, res, next),
         res.status(500).send("Internal server error");
     }
 }));
-router.get("/findUserCompany", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/findUserCompany", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const company = await CompanyModel.findOne({employees: req.user._id});
     res.send(company);
 }))
 
 
-router.post("/newCompany",  asyncHandler( async (req: express.Request, res: express.Response) => {
+router.post("/newCompany", asyncHandler(async (req: express.Request, res: express.Response) => {
     const newCompany = await CompanyModel.create(req.body);
     res.send(newCompany);
 }))
 
 
-router.get("/companyByAdmin", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.get("/companyByAdmin", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const companyInDb = await CompanyModel.findOne({admin: req.user._id});
     res.send(companyInDb);
 }))
 
 
-router.patch("/addNewEmployee",  (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.patch("/addNewEmployee", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const newEmployee = req.body.newEmployee;
     const admin = req.user._id;
     const adminsCompany = await CompanyModel.findOne({admin: admin});
@@ -56,7 +56,7 @@ router.patch("/addNewEmployee",  (req, res, next) => isAuthenticated(req, res, n
     const isValidObjectId = mongoose.Types.ObjectId.isValid(newEmployee);
 
     if (!isValidObjectId) {
-        res.status(400).send({ message: "Invalid employee ID" });
+        res.status(400).send({message: "Invalid employee ID"});
         return;
     }
 
@@ -82,18 +82,18 @@ router.patch("/addNewEmployee",  (req, res, next) => isAuthenticated(req, res, n
     }
 
     const newCompany = await CompanyModel.updateOne(
-        { _id: adminsCompany?._id },
-        { $push: { employees: newEmployee } }
+        {_id: adminsCompany?._id},
+        {$push: {employees: newEmployee}}
     );
     res.send(newCompany);
 }))
 
-router.patch("/dismiss/:employeeId", (req, res, next) => isAuthenticated(req, res, next), asyncHandler(async (req: any, res: express.Response) => {
+router.patch("/dismiss/:employeeId", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
 
     const employeeId = req.params.employeeId;
     console.log(employeeId);
 
-    const updatedCompany = await CompanyModel.findOneAndUpdate({employees: employeeId}, {$pull: { employees: employeeId }}, {new: true})
+    const updatedCompany = await CompanyModel.findOneAndUpdate({employees: employeeId}, {$pull: {employees: employeeId}}, {new: true})
     console.log("opa")
     console.log(updatedCompany)
     res.status(200).send(true);

@@ -14,6 +14,7 @@ export enum Roles {
 
 
 export interface User {
+    _id: string;
     username?: string ;
     displayName?: string;
     about?: string;
@@ -26,7 +27,7 @@ export interface User {
     activeTasks?: string[];
     considerationTasks?: Task[];
     groups?: string[];
-    bonuses?: number;
+    bonuses?: number;\
 }
 
 

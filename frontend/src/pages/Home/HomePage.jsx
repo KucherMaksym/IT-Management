@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import Modal from "../../components/Modal/Modal";
 import axios from "axios";
 import {useSelector} from "react-redux";
-
 
 
 const MyComponent = () => {
@@ -33,25 +32,16 @@ const MyComponent = () => {
     }
 
 
-
-    useEffect(() => {
-        return () => {
-            //findUserCompany()
-        };
-    }, []);
-
-
-
     return (
         <section className={`w-full flex flex-col items-center`}>
-            { !loading  && <div className={`content`}>
-                {!company.company &&
+            { !loading && <div className={`content`}>
+                {!company.company && !company.loading &&
                     <div>
                         <h1 className={` mt-10 text-4xl`}>Welcome to DoIT</h1>
                         <p>Manage your company very simple</p>
                     </div>
                 }
-                {user && isAuthenticated && !company.company && <div className={`mt-20 flex justify-center items-center container`}>
+                {!company.company && !company.loading && user && isAuthenticated && <div className={`mt-20 flex justify-center items-center container`}>
                     <div className={`w-6/12`}>
                         <h2 className={`text-2xl`}>I am a new employee</h2>
                         <button className={`text-blue-700`} onClick={() => {
@@ -76,7 +66,7 @@ const MyComponent = () => {
                     </div>
                 </div>}
 
-                {company.company && <div>
+                {company.company && user && <div>
 
                     <h1>Welcome to {company.company.name}</h1>
 
