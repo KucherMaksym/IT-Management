@@ -29,6 +29,7 @@ export interface User {
     groups?: string[];
     bonuses?: number;
     accessToken: string;
+    toClient?: () => Omit<User, 'accessToken'>
 }
 
 
@@ -46,7 +47,21 @@ export const UserSchema = new Schema<User>({
     considerationTasks: {type: [String]},
     bonuses:{type: Number, default: 0},
     accessToken: {type: String, required: true}
+}, {
+    toJSON: {
+        virtuals: true
+    },
+    toObject: {
+        virtuals: true
+    },
+    timestamps: true
 })
 
+//protects user access token when sending user model to the client
+UserSchema.methods.toClient = function() {
+    const user = this.toObject();
+    delete user.accessToken;
+    return user;
+};
 
 export const UserModel = model<User>("User", UserSchema);

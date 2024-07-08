@@ -3,7 +3,6 @@ import axios from "axios";
 import {useSelector} from "react-redux";
 import EmployeeCard from "../../components/EmployeeComponents/EmployeeCard/EmployeeCard";
 import {useQuery, useQueryClient} from "react-query";
-import companyRouter from "../../components/Routes/CompanyRouter";
 
 const EmployeeChatList = (props) => {
 

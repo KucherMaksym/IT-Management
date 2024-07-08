@@ -108,7 +108,9 @@ app.get('/callback', passport.authenticate('github', {failureRedirect: '/error'}
 
 
 app.get('/profile', authenticateJWT, (req: express.Request, res: express.Response) => {
-    res.send(req.user);
+    const user = req.user as User;
+
+    res.send(user.toClient?.());
 });
 
 

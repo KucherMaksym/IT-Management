@@ -16,7 +16,7 @@ router.patch("/changeRole", authenticateJWT, asyncHandler(async (req: any, res: 
 
     if (isNewCompany) {
         const roleChanged = await UserModel.findOneAndUpdate(userToChangeRole, {role: 'admin'});
-        res.send(roleChanged);
+        res.send(roleChanged?.toClient?.());
     }
 
     if (managerAndAdminRoles.includes(req.user.role)) {
@@ -24,7 +24,7 @@ router.patch("/changeRole", authenticateJWT, asyncHandler(async (req: any, res: 
             res.status(404).send({error: "Forbidden"});
         } else {
             const roleChanged = await UserModel.findByIdAndUpdate(userToChangeRole, {role: newRole});
-            res.send(roleChanged);
+            res.send(roleChanged?.toClient?.());
         }
     } else {
         res.status(404).send({error: "Forbidden"});
@@ -38,7 +38,7 @@ router.get("/:id", authenticateJWT, asyncHandler(async (req: any, res) => {
         return;
     }
     const userDb = await UserModel.findById(req.params.id);
-    res.send(userDb);
+    res.send(userDb?.toClient?.());
 }))
 
 export default router;

@@ -24,12 +24,14 @@ router.get("/allEmployees", authenticateJWT, asyncHandler(async (req: any, res: 
         }
         const employees = await UserModel.find({'_id': {$in: company.employees}});
 
-        res.send(employees);
+        res.send(employees.map(employee => employee.toClient?.()));
     } catch (err) {
         console.error("Error ", err);
         res.status(500).send("Internal server error");
     }
 }));
+
+
 router.get("/findUserCompany", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const company = await CompanyModel.findOne({employees: req.user._id});
     res.send(company);
@@ -96,7 +98,6 @@ router.patch("/dismiss/:employeeId", authenticateJWT, asyncHandler(async (req: a
     console.log(employeeId);
 
     const updatedCompany = await CompanyModel.findOneAndUpdate({employees: employeeId}, {$pull: {employees: employeeId}}, {new: true})
-    console.log("opa")
     console.log(updatedCompany)
     res.status(200).send(true);
 
