@@ -5,7 +5,7 @@ export interface Company {
     description: string;
     admin: string;
     employees: string[];
-    groups: string[];
+    repository: string;
 }
 
 export const CompanySchema = new Schema<Company>({
@@ -13,7 +13,7 @@ export const CompanySchema = new Schema<Company>({
     description: {type: String},
     admin: {type: String, required: true},
     employees: {type: [String]},
-    groups: {type: [String]},
+    repository: {type: String},
 },
 {
     toJSON: {

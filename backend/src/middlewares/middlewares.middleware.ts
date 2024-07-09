@@ -8,8 +8,16 @@ export const isTeamLead  = (req: any, res: express.Response, next: express.NextF
     if (req.user?.role === Roles.TEAM_LEAD || req.user?.role === Roles.MANAGER || req.user?.role === Roles.ADMIN) {
         return next();
     }
-    return res.status(403).send({ forbidden: true });
+    return res.status(403).send({ message: "forbidden" });
 }
+
+export const isAdmin  = (req: any, res: express.Response, next: express.NextFunction) => {
+    if (req.user?.role === Roles.ADMIN) {
+        return next();
+    }
+    return res.status(403).send({ message: "forbidden" });
+}
+
 
 
 

@@ -1,10 +1,11 @@
 import express, {response, Router} from 'express'
 import asyncHandler from "express-async-handler"
 import {CompanyModel} from "../models/company.model";
-import {authenticateJWT} from "../middlewares/middlewares.middleware";
+import {authenticateJWT, isAdmin} from "../middlewares/middlewares.middleware";
 import passport from "passport";
 import {Roles, User, UserModel} from "../models/user.model";
 import mongoose from "mongoose";
+import {Octokit} from "@octokit/rest";
 
 const router = Router();
 
@@ -101,6 +102,28 @@ router.patch("/dismiss/:employeeId", authenticateJWT, asyncHandler(async (req: a
     console.log(updatedCompany)
     res.status(200).send(true);
 
+}))
+
+router.get("/allMyRepos", authenticateJWT, asyncHandler(async (req: express.Request, res: express.Response) => {
+    const user = req.user as User;
+    const userDB = await UserModel.findById(user._id);
+
+    if (!userDB)
+        res.status(404).send("User not found");
+    const octokit = new Octokit({auth: userDB?.accessToken});
+
+    const {data: repos} = await octokit.repos.listForAuthenticatedUser()
+    res.status(200).send(repos)
+
+}))
+
+router.patch("/setMainRepo", authenticateJWT, isAdmin, asyncHandler(async (req: express.Request, res: express.Response) => {
+    const user = req.user as User;
+
+    const newCompany = await CompanyModel.findOneAndUpdate({admin: user._id},{repository: req.body.repository}, {new: true});
+    if(!newCompany) res.status(500).send({message: "error while setting the main repository"});
+    console.log(newCompany)
+    res.status(200).send({message: "successfully set main repo"});
 }))
 
 export default router;

@@ -6,10 +6,16 @@ import {BrowserRouter} from "react-router-dom";
 import {Provider} from "react-redux";
 import store from "./redux/store";
 import {QueryClient, QueryClientProvider} from "react-query";
+import axios from "axios";
 
 const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+export const customAxios = axios.create({
+    withCredentials: true,
+})
+
 root.render(
     //<React.StrictMode>
     <Provider store={store}>

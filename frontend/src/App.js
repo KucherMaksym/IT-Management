@@ -18,6 +18,7 @@ import ConsiderationPage from "./pages/ConsiderationPage/Consideration";
 import Chat from "./pages/Chat/Chat";
 import CompanyRouter from "./components/Routes/CompanyRouter";
 import {ToastContainer} from "react-toastify";
+import CompanySettings from "./pages/Settings/CompanySettings";
 
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
                     <Route path="/newCompany" element={<NewCompany />} />
 
                     <Route path="/company" element={<AdminRoute />}>
+                        <Route path={"settings"} element={<CompanySettings/>}/>
                         <Route path="employees" element={<EmployeesPage />} />
                         <Route path={"newTask/:id"} element={<NewTask />} />
                         <Route path="consideration" element={<ConsiderationPage />} />

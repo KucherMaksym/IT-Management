@@ -16,6 +16,7 @@ import {socketHandler} from "./socket";
 import chatRouter from "./routers/chat.router";
 import jwt from "jsonwebtoken";
 import cookieParser from 'cookie-parser';
+import {Octokit} from "@octokit/rest";
 
 
 const app = express();
@@ -107,9 +108,8 @@ app.get('/callback', passport.authenticate('github', {failureRedirect: '/error'}
 );
 
 
-app.get('/profile', authenticateJWT, (req: express.Request, res: express.Response) => {
+app.get('/profile', authenticateJWT, async (req: express.Request, res: express.Response) => {
     const user = req.user as User;
-
     res.send(user.toClient?.());
 });
 

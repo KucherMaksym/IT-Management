@@ -49,6 +49,12 @@ const ProfileNavbar = memo(() => {
                     Consideration
                 </Link>
             }
+            {
+                company.isAdmin &&
+                <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "settings" ? "text-sky-600" : ""}`} to="/company/settings" onClick={() => changeTab("settings")}>
+                    Settings
+                </Link>
+            }
 
         </nav>
     );
