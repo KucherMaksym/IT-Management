@@ -54,6 +54,28 @@ console.log(userDb.accessToken)
     res.status(200).send(onlyLogin);
 }))
 
+router.patch("/makeACollaborator", authenticateJWT, isAdmin, asyncHandler(async (req: any, res: express.Response) => {
+    const user = req.user as User;
+
+    const companyDb = await CompanyModel.findOne({admin: user._id});
+    const userDb = await UserModel.findById(user._id);
+    if (!companyDb || !userDb) {
+        res.status(404).send("Company is not found");
+        return;
+    }
+
+    const ownerAndRepoName = companyDb.repository.split("/")
+    const octokit = new Octokit({auth: userDb.accessToken});
+
+    const response = await octokit.rest.repos.addCollaborator({
+        owner: ownerAndRepoName[0],
+        repo: ownerAndRepoName[1],
+        username: req.body.newCollaborator,
+    })
+
+    res.status(200).send(response.data);
+}))
+
 
 router.get("/findUserCompany", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const company = await CompanyModel.findOne({employees: req.user._id});

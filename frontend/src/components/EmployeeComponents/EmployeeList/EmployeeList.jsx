@@ -4,6 +4,8 @@ import EmployeeCard from "../EmployeeCard/EmployeeCard";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import Modal from "../../Modal/Modal";
 import {useMutation, useQueryClient} from "react-query";
+import {customAxios} from "../../../index";
+import {Bounce, toast} from "react-toastify";
 
 const MyComponent = ({employees, collaborators}) => {
 
@@ -84,6 +86,21 @@ const MyComponent = ({employees, collaborators}) => {
         changeRole();
     };
 
+    const makeUserACollaborator = () => {
+        customAxios.patch(`http://localhost:8000/api/companies/makeACollaborator`, {newCollaborator: currentUserModal.username}).then((response) => {
+            toast.success('The invitation has been sent. Wait for confirmation.', {
+                position: "bottom-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
+    })}
+
     return (
         <div className="flex container w-screen flex-wrap p-4 ">
             {
@@ -108,12 +125,17 @@ const MyComponent = ({employees, collaborators}) => {
                             </div>
                             <div className={`flex w-full justify-between max-w-md`}>
                                 <p>groups</p>
-                                {currentUserModal.groups.length > 0 ? <strong>{currentUserModal.groups}</strong> : <strong>—</strong>}
+                                {currentUserModal.groups && currentUserModal.groups.length > 0 ? <strong>{currentUserModal.groups}</strong> : <strong>—</strong>}
                             </div>
                         </div>
 
+                        <div className={`w-full flex flex-col items-center my-5`}>
+                            <h3 className={`max-w-52`}>{currentUserModal.username} is not a collaborator of the main repository</h3>
+                            <button className={`bg-green-600 text-white rounded-md p-2 mt-3`} onClick={makeUserACollaborator}>Make a collaborator</button>
+                        </div>
+
                         <form>
-                            <h5 className={`mb-2 font-medium`}>change role</h5>
+                            <h5 className={`mb-2 font-bold`}>change role</h5>
                             <select className={`border-b border-b-blue-400 outline-0`} defaultValue={currentUserModal.role} value={newRole} onChange={(e) => setNewRole(e.target.value)}>
                                 <option value="team lead">Team leader</option>
                                 <option value="senior developer">Senior developer</option>
