@@ -59,25 +59,38 @@ passport.use(new GitHubStrategy({
         callbackURL: 'http://localhost:8000/callback'
     },
     async function (accessToken: string, refreshToken: string, profile: Profile, done: (error: any, user?: any) => void) {
+        try {
+            let user = await UserModel.findOneAndUpdate(
+                { username: profile.username },
+                {
+                    $set: {
+                        accessToken: accessToken,
+                        avatar: profile.photos?.[0]?.value ?? "default-logo.png"
+                    }
+                },
+                {
+                    new: true,
+                    upsert: true, //creates new a user if it is not found
+                    setDefaultsOnInsert: true,
+                    runValidators: true
+                }
+            );
 
-        let user = await UserModel.findOne({username: profile.username});
+            if (!user) {
+                user = new UserModel({
+                    username: profile.username,
+                    role: Roles.OTHER,
+                    avatar: profile.photos?.[0]?.value ?? "default-logo.png",
+                    accessToken: accessToken
+                });
+                await user.save();
+            }
 
-        let newUser;
-        if (!user) {
-            const createUser = await UserModel.create({
-                username: profile.username,
-                role: Roles.OTHER,
-                avatar: profile.photos?.[0]?.value ?? "default-logo.png",
-                accessToken: accessToken
-            }).then((res) => {
-                newUser = res;
-                return done(null, newUser);
-            })
+            return done(null, user);
+        } catch (error) {
+            return done(error);
         }
-
-        return done(null, user);
-    }
-));
+    }));
 
 passport.serializeUser(function (user: any, done: (error: any, id?: any) => void) {
     done(null, user);
@@ -91,7 +104,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-app.get('/auth/github', passport.authenticate('github'));
+app.get('/auth/github', passport.authenticate('github', {scope: [ 'repo', 'user:email', 'read:org', 'read:user' ]}));
 
 
 app.get('/callback', passport.authenticate('github', {failureRedirect: '/error'}),

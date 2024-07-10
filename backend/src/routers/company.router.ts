@@ -32,6 +32,28 @@ router.get("/allEmployees", authenticateJWT, asyncHandler(async (req: any, res: 
     }
 }));
 
+router.get("/allContributors", authenticateJWT,  isAdmin, asyncHandler(async (req: any, res: express.Response) => {
+    const user = req.user as User;
+    const userDb = await UserModel.findById(user._id);
+    const companyDb = await CompanyModel.findOne({admin: user._id});
+
+    if (!userDb || !companyDb) {
+        res.status(404).send("User or company is not found");
+        return;
+    }
+console.log(userDb.accessToken)
+    const octokit = new Octokit({auth: userDb.accessToken});
+    const ownerAndRepoName = companyDb?.repository.split("/");
+    console.log(ownerAndRepoName[0])
+    console.log(ownerAndRepoName[1])
+    const {data: collaborators} = await octokit.rest.repos.listCollaborators({
+        owner: ownerAndRepoName[0],
+        repo: ownerAndRepoName[1],
+    })
+    const onlyLogin = collaborators.map(collaborator => collaborator.login);
+    res.status(200).send(onlyLogin);
+}))
+
 
 router.get("/findUserCompany", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const company = await CompanyModel.findOne({employees: req.user._id});

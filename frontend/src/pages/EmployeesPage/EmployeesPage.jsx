@@ -2,6 +2,7 @@ import React, {useRef, useState} from 'react';
 import axios from "axios";
 import EmployeeList from "../../components/EmployeeComponents/EmployeeList/EmployeeList";
 import {useMutation, useQuery, useQueryClient} from "react-query";
+import {customAxios} from "../../index";
 
 const MyComponent = () => {
 
@@ -34,8 +35,15 @@ const MyComponent = () => {
         mutation.mutate()
     }
 
+    const getCollaborators = async () => {
+        const response = await customAxios.get("http://localhost:8000/api/companies/allContributors", {withCredentials: true});
+        console.log(response.data)
+        return response.data;
+    }
 
-
+    const {data: collaborators, isLoading: collaboratorsIsLoading, isError: collaboratorsIsError} = useQuery("collaborators", getCollaborators, {
+        refetchOnWindowFocus: false
+    });
 
     return (
         <div className="flex flex-col items-center">
@@ -45,7 +53,7 @@ const MyComponent = () => {
                        type="text" ref={inputId}/>
                 <button className={`bg-blue-400 h-10 p-2 text-white`} style={{borderRadius: "0 50px 50px 0"}} onClick={handleAddEmployee}>Add +</button>
             </div>
-            <EmployeeList employees={data} />
+            <EmployeeList collaborators={collaborators} employees={data} />
         </div>
     );
 };

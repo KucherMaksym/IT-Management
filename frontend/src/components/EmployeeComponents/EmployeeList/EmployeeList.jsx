@@ -5,7 +5,7 @@ import {useNavigate, useSearchParams} from "react-router-dom";
 import Modal from "../../Modal/Modal";
 import {useMutation, useQueryClient} from "react-query";
 
-const MyComponent = ({employees}) => {
+const MyComponent = ({employees, collaborators}) => {
 
     let [searchParams, setSearchParams] = useSearchParams();
     const modalId = searchParams.get('modal');
@@ -84,13 +84,12 @@ const MyComponent = ({employees}) => {
         changeRole();
     };
 
-
     return (
         <div className="flex container w-screen flex-wrap p-4 ">
             {
                 employees && employees.length > 0 && employees.map((employee) => (
                     <div className={`w-6/12`}>
-                        <EmployeeCard key={employee._id} onClick={openModal(employee._id)} {...employee}></EmployeeCard>
+                        <EmployeeCard key={employee._id} collaborators={collaborators} onClick={openModal(employee._id)} {...employee}></EmployeeCard>
                     </div>
                 ))
             }
