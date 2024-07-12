@@ -104,7 +104,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-app.get('/auth/github', passport.authenticate('github', {scope: [ 'repo', 'user:email', 'read:org', 'read:user' ]}));
+app.get('/auth/github', passport.authenticate('github', {scope: [ 'repo', 'user:email', 'read:org', 'read:user', 'repo:write', 'repo:status' ]}));
 
 
 app.get('/callback', passport.authenticate('github', {failureRedirect: '/error'}),

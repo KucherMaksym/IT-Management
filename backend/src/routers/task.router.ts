@@ -2,11 +2,13 @@ import express, {Router} from 'express';
 import passport from "passport";
 import {authenticateJWT, isTeamLead} from "../middlewares/middlewares.middleware";
 import asyncHandler from "express-async-handler";
-import {Roles, UserModel} from "../models/user.model";
+import {Roles, User, UserModel} from "../models/user.model";
 import {Task, TaskModel, TaskStatus} from "../models/task.model";
 import multer from "multer";
 import path from "node:path";
 import {startSession} from "mongoose";
+import {Octokit} from "@octokit/rest";
+import {CompanyModel} from "../models/company.model";
 
 const admin = require("firebase-admin");
 const serviceAccount = require("./../firebase-key.json");
@@ -76,13 +78,63 @@ router.get('/taskByDate/:date', async (req, res) => {
 router.post("/newTask/:id", upload.array("files"), authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const {name, description, deadline} = req.body;
     const id = req.params.id;
-    console.log(req.files);
+    const user = req.user as User;
 
-    const user = await UserModel.findById(id);
+    const userDb = await UserModel.findById(id);
 
-    if (!user) {
+    const adminDb = await UserModel.findById(user._id);
+
+    if (!adminDb) {
+        res.status(404).send("Company is not found");
+        return;
+    }
+
+    if (!userDb) {
         res.status(404).send("User not found");
         return;
+    }
+
+    const companyDb = await CompanyModel.findOne({$or: [{admin: userDb._id}, {employees: userDb._id}] });
+    if (!companyDb) {
+        res.status(404).send("Company is not found");
+        return;
+    }
+
+    const ownerAndRepoName = companyDb.repository.split("/")
+    console.log(userDb.accessToken)
+    const octokit = new Octokit({auth: adminDb.accessToken});
+
+    const {data: repo} = await octokit.rest.repos.get({
+        owner: ownerAndRepoName[0],
+        repo: ownerAndRepoName[1],
+    })
+
+    if (!repo) {
+        res.status(404).send("repository not found");
+        return;
+    }
+
+    const {data: ref} = await octokit.rest.git.getRef({
+        owner: ownerAndRepoName[0],
+        repo: ownerAndRepoName[1],
+        ref: `heads/${repo.default_branch}`
+    })
+
+    if (!ref) {
+        res.status(404).send("repository not found");
+        return;
+    }
+
+    const {data: newRef} = await octokit.rest.git.createRef({
+        owner : ownerAndRepoName[0],
+        repo: ownerAndRepoName[1],
+        ref: `refs/heads/${name}`,
+        sha: `${ref.object.sha}`,
+    });
+
+    if (!newRef) {
+        res.status(500).send("Internal server error while creating a new ref");
+        return
     }
 
     let task: Task = {
@@ -94,7 +146,8 @@ router.post("/newTask/:id", upload.array("files"), authenticateJWT, asyncHandler
             _id: req.user._id,
             avatar: req.user.avatar
         },
-        status: TaskStatus.IN_PROGRESS
+        status: TaskStatus.IN_PROGRESS,
+        branchName: newRef.ref
     };
 
     if (req.files) {

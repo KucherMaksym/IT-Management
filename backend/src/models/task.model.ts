@@ -22,6 +22,7 @@ export interface Task {
         avatar: string
     }
     files?: string[];
+    branchName?: string;
 }
 
 export const taskSchema = new Schema<Task>({
@@ -37,6 +38,7 @@ export const taskSchema = new Schema<Task>({
         avatar: {type: String, required: true},
     },
     files: {type: [String]},
+    branchName: {type: String},
 },
 {
     toJSON: {
