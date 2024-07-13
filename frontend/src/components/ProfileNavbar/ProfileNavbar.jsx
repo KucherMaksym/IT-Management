@@ -1,61 +1,76 @@
-import React, {memo, useEffect, useState} from 'react';
-import {Link} from "react-router-dom";
-import {useSelector} from "react-redux";
+import React, { memo, useEffect, useState, useRef } from 'react';
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import DropDownMenu from "../DropDownMenu/DropDownMenu";
 
 const ProfileNavbar = memo(() => {
-
-    const {company} = useSelector(state => state.user);
-
+    const { company } = useSelector(state => state.user);
     const [tab, setTab] = useState('profile');
+    const [openMenuIndex, setOpenMenuIndex] = useState(null);
+    const navRef = useRef(null);
 
     const changeTab = (value) => {
-        setTab(value)
-        localStorage.setItem("previous tab", (value));
+        setTab(value);
+        localStorage.setItem("previous tab", value);
     }
 
     useEffect(() => {
-        const previousTab =localStorage.getItem("previous tab")
+        const previousTab = localStorage.getItem("previous tab");
         if (previousTab) {
             changeTab(previousTab);
         }
     }, []);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (navRef.current && !navRef.current.contains(event.target)) {
+                setOpenMenuIndex(null);
+            }
+        };
 
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
+    const handleMenuToggle = (index) => {
+        setOpenMenuIndex(openMenuIndex === index ? null : index);
+    };
+
+    const menuItems = [
+        { title: "Profile", options: ["Tasks", "Chat", "Stars"], path: ["/profile/tasks", "/profile/chat", "/profile/stars"] },
+    ];
+
+    if (company.isAdmin) {
+        menuItems.push(
+            {title: "Company", options: ["Employees", "Settings", "Consideration"], path: ["/company/employees", "/company/settings", "/company/consideration"] },
+        );
+    }
 
     return (
-        <nav className={`container flex justify-start h-10 items-center`}>
-            <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "profile" ? "text-sky-600" : ""}`} to={"/profile"} onClick={() => changeTab('profile')}>
-                Profile
-            </Link>
-            <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "tasks" ? "text-sky-600" : ""}`} to="/profile/tasks" onClick={() => changeTab("tasks")}>
-                Tasks
-            </Link>
-            <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "chat" ? "text-sky-600" : ""}`} to="/profile/chat" onClick={() => changeTab("chat")}>
-                Chat
-            </Link>
-            <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "stars" ? "text-sky-600" : ""}`} to="/profile/stars" onClick={() => changeTab("stars")}>
-                Stars
-            </Link>
-            {
-                company.isAdmin &&
-                <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "employees" ? "text-sky-600" : ""}`} to="/company/employees" onClick={() => changeTab("employees")}>
-                    Employees
-                </Link>
-            }
-            {
-                company.isAdmin &&
-                <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "consideration" ? "text-sky-600" : ""}`} to="/company/consideration" onClick={() => changeTab("consideration")}>
-                    Consideration
-                </Link>
-            }
-            {
-                company.isAdmin &&
-                <Link className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === "settings" ? "text-sky-600" : ""}`} to="/company/settings" onClick={() => changeTab("settings")}>
-                    Settings
-                </Link>
-            }
-
+        <nav className={`container flex justify-start h-10 items-center`} ref={navRef}>
+            {menuItems.map((item, index) => (
+                item.options ? (
+                    <DropDownMenu
+                        key={index}
+                        title={item.title}
+                        options={item.options}
+                        path={item.path}
+                        isOpen={openMenuIndex === index}
+                        onToggle={() => handleMenuToggle(index)}
+                    />
+                ) : (
+                    <Link
+                        key={index}
+                        className={`mr-5 font-semibold hover:text-sky-600 duration-200 ${tab === item.title.toLowerCase() ? "text-sky-600" : ""}`}
+                        to={item.path}
+                        onClick={() => changeTab(item.title.toLowerCase())}
+                    >
+                        {item.title}
+                    </Link>
+                )
+            ))}
         </nav>
     );
 });
