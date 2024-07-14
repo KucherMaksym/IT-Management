@@ -6,6 +6,7 @@ import TaskImages from "./TaskImages/TaskImages";
 import TaskFiles from "./TaskFiles/TaskFiles";
 import {useDispatch} from "react-redux";
 import {removeTask} from "../../../redux/actions/tasksActions";
+import CopyBranchName from "../../../components/GitHubComponents/CopyBranchName";
 
 
 const Task = (props) => {
@@ -97,7 +98,7 @@ const Task = (props) => {
             </div>
             <div className={`w-full text-start p-5 flex flex-col justify-between min-h-60`}>
                 <div>
-                    {props.task.branchName && <p>git checkout <strong>{props.task.branchName}</strong></p>}
+                    {props.task.branchName && <CopyBranchName branchName={props.task.branchName}/>}
 
                     <p className={``}>
                         {props.loading ? (

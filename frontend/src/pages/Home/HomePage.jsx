@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Modal from "../../components/Modal/Modal";
 import axios from "axios";
 import {useSelector} from "react-redux";
+import {Bounce, toast} from "react-toastify";
 
 
 const MyComponent = () => {
@@ -46,6 +47,17 @@ const MyComponent = () => {
                         <h2 className={`text-2xl`}>I am a new employee</h2>
                         <button className={`text-blue-700`} onClick={() => {
                             navigator.clipboard.writeText(user._id)
+                            toast.success('ID copied!', {
+                                position: "bottom-right",
+                                autoClose: 5000,
+                                hideProgressBar: false,
+                                closeOnClick: true,
+                                pauseOnHover: true,
+                                draggable: true,
+                                progress: undefined,
+                                theme: "light",
+                                transition: Bounce,
+                            });
                         }}>Copy my ID
                         </button>
                         <p className={`text-xs`}>*Send this ID to an admin or manager of company</p>
