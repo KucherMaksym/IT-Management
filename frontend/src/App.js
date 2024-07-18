@@ -14,7 +14,6 @@ import TaskList from "./pages/Tasks/TaskList/TaskList";
 import {getProfile} from "./redux/actions/userActions";
 import React, {useEffect} from "react";
 import {useDispatch} from "react-redux";
-import ConsiderationPage from "./pages/ConsiderationPage/Consideration";
 import Chat from "./pages/Chat/Chat";
 import CompanyRouter from "./components/Routes/CompanyRouter";
 import {ToastContainer} from "react-toastify";
@@ -66,7 +65,6 @@ function App() {
                         <Route path={"settings"} element={<CompanySettings/>}/>
                         <Route path="employees" element={<EmployeesPage />} />
                         <Route path={"newTask/:id"} element={<NewTask />} />
-                        <Route path="consideration" element={<ConsiderationPage />} />
                     </Route>
 
                     <Route path="/*" element={<NotFound />} />

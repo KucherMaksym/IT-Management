@@ -1,12 +1,13 @@
 import React, {useRef, useState} from 'react';
 import StaticDatePickerLandscape from "../../../components/Calendar/Calendar";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {useMutation} from 'react-query';
+import {useMutation, useQuery} from 'react-query';
 import axios from "axios";
 import {Bounce, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import paperClip from "./../../../components/assets/paperClip.svg"
 import Expanded from "../../../components/Expanded/Expanded";
+import {customAxios} from "../../../index";
 
 const createNewTask = async (taskData) => {
     const response = await axios.post(`http://localhost:8000/api/tasks/newTask/${taskData.id}`, taskData.formData, {
@@ -32,6 +33,16 @@ const NewTask = () => {
 
    const [createBranch, setCreateBranch] = useState(true);
    const branchName = useRef(null);
+
+    const getCollaborators = async () => {
+        const response = await customAxios.get("http://localhost:8000/api/companies/allContributors", {withCredentials: true});
+        console.log(response.data)
+        return response.data;
+    }
+
+    const {data: collaborators, isLoading: collaboratorsIsLoading, isError: collaboratorsIsError} = useQuery("collaborators", getCollaborators, {
+        refetchOnWindowFocus: false
+    });
 
     const handleNewDay = (e) => {
         setSelectedDay(e);
@@ -89,11 +100,17 @@ const NewTask = () => {
                 transition: Bounce,
             });
         }
+        let createBranchInForm;
+        if (collaborators.includes(searchParams.get("username"))) {
+            createBranchInForm = createBranch
+        } else {
+            createBranchInForm = false
+        }
 
         const formData = new FormData();
         formData.append('name', newTask.name);
         formData.append('description', newTask.description);
-        formData.append('createBranch', newTask.createBranch);
+        formData.append('createBranch', createBranchInForm);
         formData.append('branchName', newTask.branchName);
         formData.append('deadline', selectedDay.format("YYYY-MM-DD"));
 
@@ -170,29 +187,31 @@ const NewTask = () => {
                     </div>
                 </div>
             </div>
-
-            <div className={`w-full flex mt-5`}>
-                <div className={`w-full md:w-6/12`}>
-                    <Expanded isOpenByDefault={true} title={"GitHub"}>
-                        <div className={`flex flex-col justify-start`}>
-                            <div className={`flex justify-start`}>
-                                {/*toggle button*/}
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" onChange={() => setCreateBranch(!createBranch)}
-                                           className="sr-only peer " checked={createBranch}/>
-                                    <div
-                                        className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                </label>
-                                <h3 className={`text-lg ml-5`}>Create a new branch</h3>
+            { collaborators &&
+                <div className={`w-full flex mt-5 ${!collaborators.includes(searchParams.get("username")) ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
+                    <div className={`w-full md:w-6/12`}>
+                        <Expanded isOpenByDefault={true} title={"GitHub"}>
+                            <div className={`flex flex-col justify-start`}>
+                                <div className={`flex justify-start`}>
+                                    {/*toggle button*/}
+                                    <label className="inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" onChange={() => setCreateBranch(!createBranch)}
+                                               className="sr-only peer " checked={createBranch}/>
+                                        <div
+                                            className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                    </label>
+                                    <h3 className={`text-lg ml-5`}>Create a new branch</h3>
+                                </div>
+                                <input
+                                    className={` border border-gray-500 mt-3 w-72 outline-indigo-400 rounded-md p-1 disabled:opacity-50`}
+                                    placeholder={"Branch name (task name by default)"} type="text"
+                                    disabled={!createBranch} ref={branchName}/>
                             </div>
-                            <input className={` border border-gray-500 mt-3 w-72 outline-indigo-400 rounded-md p-1 disabled:opacity-50`}
-                                   placeholder={"Branch name (task name by default)"} type="text"
-                                   disabled={!createBranch} ref={branchName}/>
-                        </div>
-                    </Expanded>
+                        </Expanded>
+                    </div>
                 </div>
+            }
 
-            </div>
         </div>
     );
 };

@@ -128,15 +128,20 @@ const MyComponent = ({employees, collaborators}) => {
                                 {currentUserModal.groups && currentUserModal.groups.length > 0 ? <strong>{currentUserModal.groups}</strong> : <strong>—</strong>}
                             </div>
                         </div>
-
-                        <div className={`w-full flex flex-col items-center my-5`}>
-                            <h3 className={`max-w-52`}>{currentUserModal.username} is not a collaborator of the main repository</h3>
-                            <button className={`bg-green-600 text-white rounded-md p-2 mt-3`} onClick={makeUserACollaborator}>Make a collaborator</button>
-                        </div>
-
+                        { !collaborators.includes(currentUserModal.username) &&
+                            <div className={`w-full flex flex-col items-center my-5`}>
+                                <h3 className={`max-w-52`}>{currentUserModal.username} is not a collaborator of the main
+                                    repository</h3>
+                                <button className={`bg-green-600 text-white rounded-md p-2 mt-3`}
+                                        onClick={makeUserACollaborator}>Make a collaborator
+                                </button>
+                            </div>
+                        }
                         <form>
                             <h5 className={`mb-2 font-bold`}>change role</h5>
-                            <select className={`border-b border-b-blue-400 outline-0`} defaultValue={currentUserModal.role} value={newRole} onChange={(e) => setNewRole(e.target.value)}>
+                            <select className={`border-b border-b-blue-400 outline-0`}
+                                    defaultValue={currentUserModal.role} value={newRole}
+                                    onChange={(e) => setNewRole(e.target.value)}>
                                 <option value="team lead">Team leader</option>
                                 <option value="senior developer">Senior developer</option>
                                 <option value="middle developer">Middle developer</option>

@@ -25,7 +25,6 @@ export interface User {
     company?: string;
     completedTasks?: string[];
     activeTasks?: string[];
-    considerationTasks?: Task[];
     groups?: string[];
     bonuses?: number;
     accessToken: string;
@@ -44,7 +43,6 @@ export const UserSchema = new Schema<User>({
     role: {type: String, required: true, default: Roles.OTHER},
     completedTasks: {type: [String]},
     activeTasks: {type: [String]},
-    considerationTasks: {type: [String]},
     bonuses:{type: Number, default: 0},
     accessToken: {type: String, required: true}
 }, {

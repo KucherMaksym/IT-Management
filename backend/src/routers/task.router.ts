@@ -51,18 +51,12 @@ router.get("/allTasks", authenticateJWT, asyncHandler(async (req: any, res: expr
     res.send(allTasks);
 }));
 
-router.get("/allConsiderationTasks", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
-
-    const tasks = await TaskModel.find({status: TaskStatus.CONSIDERATION})
-    res.send(tasks);
-
-}))
 
 router.get("/:id", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const id = req.params.id;
     const user = await UserModel.findById(req.user._id);
 
-    if (!user?.activeTasks?.includes(id) && !user?.considerationTasks?.includes(id)) {
+    if (!user?.activeTasks?.includes(id)) {
         if (req.user.role !== Roles.ADMIN && req.user.role !== Roles.MANAGER) {
             res.status(404).send({response: "Task not found"});
             return;
@@ -93,7 +87,7 @@ router.get('/taskByDate/:date', async (req, res) => {
 });
 
 router.post("/newTask/:id", upload.array("files"), authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
-    const {name, description, deadline} = req.body;
+    const {name, description, deadline, createBranch, branchName} = req.body;
     const id = req.params.id;
     const user = req.user as User;
 
@@ -119,40 +113,6 @@ router.post("/newTask/:id", upload.array("files"), authenticateJWT, asyncHandler
 
     const ownerAndRepoName = companyDb.repository.split("/")
     console.log(userDb.accessToken)
-    const octokit = new Octokit({auth: adminDb.accessToken});
-
-    const {data: repo} = await octokit.rest.repos.get({
-        owner: ownerAndRepoName[0],
-        repo: ownerAndRepoName[1],
-    })
-
-    if (!repo) {
-        res.status(404).send("repository not found");
-        return;
-    }
-
-    const {data: ref} = await octokit.rest.git.getRef({
-        owner: ownerAndRepoName[0],
-        repo: ownerAndRepoName[1],
-        ref: `heads/${repo.default_branch}`
-    })
-
-    if (!ref) {
-        res.status(404).send("repository not found");
-        return;
-    }
-
-    const {data: newRef} = await octokit.rest.git.createRef({
-        owner : ownerAndRepoName[0],
-        repo: ownerAndRepoName[1],
-        ref: `refs/heads/${name}`,
-        sha: `${ref.object.sha}`,
-    });
-
-    if (!newRef) {
-        res.status(500).send("Internal server error while creating a new ref");
-        return
-    }
 
     let task: Task = {
         name,
@@ -164,8 +124,46 @@ router.post("/newTask/:id", upload.array("files"), authenticateJWT, asyncHandler
             avatar: req.user.avatar
         },
         status: TaskStatus.IN_PROGRESS,
-        branchName: newRef.ref
     };
+
+    if (createBranch === true) {
+        const octokit = new Octokit({auth: adminDb.accessToken});
+
+        const {data: repo} = await octokit.rest.repos.get({
+            owner: ownerAndRepoName[0],
+            repo: ownerAndRepoName[1],
+        })
+
+        if (!repo) {
+            res.status(404).send("repository not found");
+            return;
+        }
+
+        const {data: ref} = await octokit.rest.git.getRef({
+            owner: ownerAndRepoName[0],
+            repo: ownerAndRepoName[1],
+            ref: `heads/${repo.default_branch}`
+        })
+
+        if (!ref) {
+            res.status(404).send("repository not found");
+            return;
+        }
+
+        const {data: newRef} = await octokit.rest.git.createRef({
+            owner : ownerAndRepoName[0],
+            repo: ownerAndRepoName[1],
+            ref: `refs/heads/${branchName ? branchName : name}`,
+            sha: `${ref.object.sha}`,
+        });
+
+        if (!newRef) {
+            res.status(500).send("Internal server error while creating a new ref");
+            return
+        }
+
+        task.branchName = newRef.ref
+    }
 
     if (req.files) {
         const imageUrls = await Promise.all(
@@ -234,7 +232,7 @@ router.patch("/complete/:id", authenticateJWT, asyncHandler(async (req: any, res
 
         const changeTaskStatusInDb = async () => {
             const updatedTask = await TaskModel.findByIdAndUpdate(id, {status: TaskStatus.CONSIDERATION}, {new: true});
-            userDb?.considerationTasks?.push(id);
+            // userDb?.considerationTasks?.push(id);
             const updatedActiveTasks = userDb?.activeTasks?.filter(function (newActiveTasks) {
                 return newActiveTasks !== id;
             });
@@ -285,43 +283,6 @@ router.patch("/complete/:id", authenticateJWT, asyncHandler(async (req: any, res
         res.status(500).send(err);
     }
 }));
-
-router.patch("/accept/:id", isTeamLead, authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
-    const taskId = req.params.id;
-    const user = await UserModel.findOne({considerationTasks: taskId});
-
-    const session = await startSession();
-
-    session.startTransaction();
-
-    // $pull deletes the value from array
-
-    try {
-        const updatedUser = await UserModel.findByIdAndUpdate(user?._id, {
-            $pull: {considerationTasks: taskId},
-            $push: {completedTasks: taskId}
-        }, {session, new: true});
-        const updatedTask = await TaskModel.findByIdAndUpdate(taskId, {
-            status: TaskStatus.COMPLETED,
-        }, {session, new: true});
-
-        if (updatedTask && updatedUser) {
-            await session.commitTransaction();
-            console.log("successful commit")
-            res.send(updatedTask);
-        } else {
-            await session.abortTransaction();
-            console.log('Transaction aborted');
-        }
-
-    } catch (error) {
-        console.error('Transaction error:', error);
-        await session.abortTransaction();
-    } finally {
-        await session.endSession();
-    }
-
-}))
 
 
 export default router;
