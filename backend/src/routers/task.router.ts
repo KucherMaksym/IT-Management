@@ -28,6 +28,23 @@ const upload = multer({storage});
 router.use(passport.initialize());
 router.use(passport.session());
 
+const getOwnerAndRepoName = async (userId: string) => {
+    const userDb = await UserModel.findById(userId);
+
+    if (!userDb) {
+        return;
+    }
+
+    const companyDb = await CompanyModel.findOne({$or: [{admin: userDb._id}, {employees: userDb._id}] });
+
+    if (!companyDb) {
+        return;
+    }
+    const ownerAndRepoName = companyDb.repository.split("/");
+    return ownerAndRepoName;
+
+}
+
 router.get("/allTasks", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const id = req.user._id;
     const allTasks = await TaskModel.find({takenBy: id, status: TaskStatus.IN_PROGRESS});
@@ -198,27 +215,76 @@ router.get("/download/:fileName", authenticateJWT, asyncHandler(async (req: any,
 }));
 
 router.patch("/complete/:id", authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
-        const id = req.params.id;
+    const id = req.params.id;
+    const user = req.user as User;
 
-        try {
-            const updatedTask = await TaskModel.findByIdAndUpdate(id, {status: TaskStatus.CONSIDERATION}, {new: true});
+    if (!user) {
+        res.status(500).send("Internal server error");
+        return;
+    }
 
-            const user = await UserModel.findById(updatedTask?.takenBy);
+    try {
+        const taskDb = await TaskModel.findById(id);
+        const userDb = await UserModel.findById(taskDb?.takenBy);
 
-            user?.considerationTasks?.push(id);
-            const updatedActiveTasks = user?.activeTasks?.filter(function (newActiveTasks) {
-                return newActiveTasks !== id;
-            })
-            user ? user.activeTasks = updatedActiveTasks : null;
-            await user?.save();
-            res.send(user);
-
-        } catch (err) {
-            console.error("Error", err);
-            res.status(500).send(err);
+        if (!userDb || !taskDb) {
+            res.status(404).send("user or task not found");
+            return;
         }
-    })
-);
+
+        const changeTaskStatusInDb = async () => {
+            const updatedTask = await TaskModel.findByIdAndUpdate(id, {status: TaskStatus.CONSIDERATION}, {new: true});
+            userDb?.considerationTasks?.push(id);
+            const updatedActiveTasks = userDb?.activeTasks?.filter(function (newActiveTasks) {
+                return newActiveTasks !== id;
+            });
+            userDb ? userDb.activeTasks = updatedActiveTasks : null;
+            await userDb?.save();
+            res.send(userDb);
+        }
+
+        if (taskDb.branchName) {
+            const octokit = new Octokit({auth: user.accessToken});
+            const ownerAndRepoName = await getOwnerAndRepoName(user._id);
+
+            if (!ownerAndRepoName) {
+                res.status(404).send("repository not found");
+                return;
+            }
+
+            const {data: repo} = await octokit.rest.repos.get({
+                owner: ownerAndRepoName[0],
+                repo: ownerAndRepoName[1]
+            });
+
+            if (!repo) {
+                res.status(404).send("repository not found");
+                return;
+            }
+
+            const response = await octokit.rest.pulls.create({
+                owner: ownerAndRepoName[0],
+                repo: ownerAndRepoName[1],
+                title: `Pull request for branch ${taskDb.branchName}`,
+                head: taskDb.branchName,
+                base: repo.default_branch
+            });
+
+            if (response.status !== 201) {
+                res.status(500).send("Internal server error");
+                return;
+            }
+            await changeTaskStatusInDb();
+            res.status(200).send(response.data);
+            return;
+        }
+        await changeTaskStatusInDb();
+
+    } catch (err) {
+        console.error("Error", err);
+        res.status(500).send(err);
+    }
+}));
 
 router.patch("/accept/:id", isTeamLead, authenticateJWT, asyncHandler(async (req: any, res: express.Response) => {
     const taskId = req.params.id;

@@ -72,35 +72,40 @@ const TaskList = () => {
 
     return (
         <div className={`flex container h-[calc(100vh_-_106px)] flex-col items-center justify-center-700 p-3`}>
-            {tasks.length > 0  && !loading ?
-                <div className="flex flex-col-reverse w-full max-w-4xl items-center lg:flex-row mt-10">
-                    <div className="max-h-[600px] border-2 border-gray-300 overflow-x-hidden overflow-y-scroll lg:w-6/12 flex items-center bg-gray-200 h-full justify-start flex-col">
-                        {isImageOpened ? document.body.classList.add("no-scroll") : document.body.classList.remove("no-scroll")}
-                        {tasks.map((task, index) => (
-                            <TaskCard
-                                isSelected={currentTask ? currentTask._id === task._id : false}
-                                index={index}
-                                key={task._id}
-                                maxIndex={tasks.length - 1}
-                                {...task}
-                                onClick={clickTask(task._id)}
-                            />
-                        ))}
-                    </div>
-                    <div className="w-6/12 flex flex-col lg:items-end justify-center">
-                        <StaticDatePickerWithHighlight onChange={handleNewDay} selectedDay={selectedDay}
-                                                       highlightedDates={dates}/>
-                    </div>
-                </div>
-                :
-                <div className={`h-full flex flex-col items-center justify-center`}>
-                    <h2 className={`text-zinc-800 text-3xl font-bold`}>
-                        No any tasks for you
-                    </h2>
-                    <img src={noTasks} alt=""/>
+            {!loading &&
+                (tasks.length > 0   ?
+                        <div className="flex flex-col-reverse w-full max-w-4xl items-center lg:flex-row mt-10">
+                            <div className="max-h-[600px] border-2 border-gray-300 overflow-x-hidden overflow-y-scroll lg:w-6/12 flex items-center bg-gray-200 h-full justify-start flex-col">
+                                {isImageOpened ? document.body.classList.add("no-scroll") : document.body.classList.remove("no-scroll")}
+                                {tasks.map((task, index) => (
+                                    <TaskCard
+                                        isSelected={currentTask ? currentTask._id === task._id : false}
+                                        index={index}
+                                        key={task._id}
+                                        maxIndex={tasks.length - 1}
+                                        {...task}
+                                        onClick={clickTask(task._id)}
+                                    />
+                                ))}
+                            </div>
+                            <div className="w-6/12 flex flex-col lg:items-end justify-center">
+                                <StaticDatePickerWithHighlight onChange={handleNewDay} selectedDay={selectedDay}
+                                                               highlightedDates={dates}/>
+                            </div>
+                        </div>
+                        :
+                        <div className={`h-full flex flex-col items-center justify-center`}>
+                            <h2 className={`text-zinc-800 text-3xl font-bold`}>
+                                No any tasks for you
+                            </h2>
+                            <img src={noTasks} alt=""/>
 
-                </div>
+                        </div>
+                )
             }
+
+
+
             { currentTask && (
             <div className={`w-full flex my-10 items-center justify-center`}>
                 <Task
@@ -108,6 +113,7 @@ const TaskList = () => {
                     isImageOpened={setIsImageOpened}
                     task={currentTask}
                     completeTask={handleCompleteTask}
+                    loading={loading}
                 />
             </div>
             )}

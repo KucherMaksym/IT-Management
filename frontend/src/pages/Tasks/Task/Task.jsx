@@ -76,22 +76,18 @@ const Task = (props) => {
             {isImageOpened && <ImageFullScreen onClose={closeImgInFullScreen} fileUrl={currentImage} />}
             <div className={`w-full justify-between  p-5 flex h-20 border-b  border-gray-500`}>
                 <div className={`flex items-center`}>
-                    {props.loading ? (
-                        <div className="w-12 h-12 bg-gray-300 rounded-full mr-4 animate-pulse"></div>
-                    ) : (
-                        <img src={props.task.createdBy.avatar} alt={``} width={"50px"} style={{borderRadius: "50%"}} className={`mr-4`} />
-                    )}
+                    <img src={props.task.createdBy.avatar} alt={``} width={"50px"} style={{borderRadius: "50%"}} className={`mr-4`} />
                     <h3 className={`text-xl font-semibold`}>
-                        {props.loading ? <div className="w-32 h-6 bg-gray-300 animate-pulse"></div> : props.task.name}
+                        {props.task.name}
                     </h3>
                 </div>
                 <div className={`flex items-center`}>
                     <p className={`flex`}>
-                        deadline: <strong>{props.loading ? <div className="w-24 h-6 bg-gray-300 animate-pulse"> </div> : dayjs(props.task.deadline).format("YYYY-MM-DD")}</strong>
+                        deadline: <strong>{dayjs(props.task.deadline).format("YYYY-MM-DD")}</strong>
                     </p>
                     {props.task.bonuses && (
                         <p>
-                            bonuses: <strong>{props.loading ? <div className="w-24 h-6 bg-gray-300 animate-pulse"></div> : props.task.bonuses}</strong>
+                            bonuses: <strong>{props.task.bonuses}</strong>
                         </p>
                     )}
                 </div>
@@ -101,15 +97,7 @@ const Task = (props) => {
                     {props.task.branchName && <CopyBranchName branchName={props.task.branchName}/>}
 
                     <p className={``}>
-                        {props.loading ? (
-                            <>
-                                <div className="w-full h-6 bg-gray-300 mb-2 animate-pulse"></div>
-                                <div className="w-3/4 h-6 bg-gray-300 mb-2 animate-pulse"></div>
-                                <div className="w-1/2 h-6 bg-gray-300 animate-pulse"></div>
-                            </>
-                        ) : (
-                            props.task.description
-                        )}
+                        {props.task.description}
                     </p>
                 </div>
                 { images.length > 0 &&
@@ -134,11 +122,7 @@ const Task = (props) => {
                     ))
                 }
                 <div className={`w-full flex justify-end `}>
-                    {props.loading ? (
-                        <div className="w-24 h-10 bg-gray-300 rounded-xl animate-pulse"></div>
-                    ) : (
-                        <button className={`bg-blue-600 text-white font-bold rounded-xl px-4 p-2 hover:bg-blue-400 duration-200`} onClick={props.isConsideration ? acceptTask : completeTask}>{`${props.isConsideration ? "Accept" : "Complete"}`}</button>
-                    )}
+                    <button className={`bg-blue-600 text-white font-bold rounded-xl px-4 p-2 hover:bg-blue-400 duration-200`} onClick={props.isConsideration ? acceptTask : completeTask}>{`${props.isConsideration ? "Accept" : "Complete"}`}</button>
                 </div>
             </div>
         </div>

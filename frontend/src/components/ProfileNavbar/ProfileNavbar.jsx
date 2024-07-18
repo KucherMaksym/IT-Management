@@ -49,7 +49,7 @@ const ProfileNavbar = memo(() => {
     }
 
     return (
-        <nav className={`container flex justify-start h-10 items-center`} ref={navRef}>
+        <nav className={`container ml-10 flex justify-start h-10 items-center`} ref={navRef}>
             {menuItems.map((item, index) => (
                 item.options ? (
                     <DropDownMenu
