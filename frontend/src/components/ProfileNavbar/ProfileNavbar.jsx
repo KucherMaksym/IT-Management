@@ -39,12 +39,12 @@ const ProfileNavbar = memo(() => {
     };
 
     const menuItems = [
-        { title: "Profile", options: ["Tasks", "Chat", "Stars"], path: ["/profile/tasks", "/profile/chat", "/profile/stars"] },
+        { title: "Profile", options: ["Tasks", "Chat"], path: ["/profile/tasks", "/profile/chat"] },
     ];
 
     if (company.isAdmin) {
         menuItems.push(
-            {title: "Company", options: ["Employees", "Settings", "Consideration"], path: ["/company/employees", "/company/settings", "/company/consideration"] },
+            {title: "Company", options: ["Employees", "Settings"], path: ["/company/employees", "/company/settings"] },
         );
     }
 

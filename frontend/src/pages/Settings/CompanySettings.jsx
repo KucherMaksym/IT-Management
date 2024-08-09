@@ -39,15 +39,19 @@ const CompanySettings = () => {
 
 
     return (
-        <div>
-            <div className={`flex flex-col`}>
+        <div className={`w-full p-3`}>
+            <div className={`flex flex-col w-full border rounded-md border-gray-300 max-w-[400px] md:w-6/12 p-3`}>
                 <p className={`font-bold text-lg`}>Select repository</p>
-                {data && data.map((repo, index) => (
-                    <button key={index} onClick={() => onSelectRepo(repo)}>{repo.full_name}</button>
-                ))}
+                <ul>
+                    {data && data.map((repo, index) => (
+                        <li className={`flex justify-between`}>
+                            <span>{index + 1}</span> <button title={repo.full_name} className={`text-ellipsis overflow-x-hidden ml-5`} key={index} onClick={() => onSelectRepo(repo)}>{repo.full_name}</button>
+                        </li>
+                    ))}
+                </ul>
             </div>
 
-            { isModalOpen &&
+            {isModalOpen &&
 
                 <Modal onClose={() => setIsModalOpen(false)}>
                     <div className={`flex flex-col items-center mt-5`}>
